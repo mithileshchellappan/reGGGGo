@@ -88,6 +88,9 @@ Devvit.addCustomPostType({
               },
             });
             break;
+            case 'brickAdded': 
+              console.log("Brick added:", message.data.brick)
+              break;
           default:
             throw new Error(`Unknown message type: ${message satisfies never}`);
         }

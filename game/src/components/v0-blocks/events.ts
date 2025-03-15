@@ -1,3 +1,4 @@
+import { sendMessage } from "../../lib/message-devvit"
 import type { Dispatch, SetStateAction } from "react"
 
 // Define types for our brick and history
@@ -26,6 +27,12 @@ export const handleAddBrick = (
   newHistory.push(newBricks)
   setHistory(newHistory)
   setHistoryIndex(historyIndex + 1)
+  sendMessage({
+    type: "brickAdded",
+    data: {
+      brick: brick,
+    },
+  })
 }
 
 export const handleDeleteBrick = (

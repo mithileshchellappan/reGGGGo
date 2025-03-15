@@ -1,3 +1,5 @@
+import type { Brick } from "./game/src/components/v0-blocks/events"
+
 /** Message from Devvit to the web view. */
 export type DevvitMessage =
   | { type: 'initialData'; data: { username: string; currentCounter: number } }
@@ -6,7 +8,8 @@ export type DevvitMessage =
 /** Message from the web view to Devvit. */
 export type WebViewMessage =
   | { type: 'webViewReady' }
-  | { type: 'setCounter'; data: { newCounter: number } };
+  | { type: 'setCounter'; data: { newCounter: number } }
+  | { type: 'brickAdded'; data: { brick: Brick } };
 
 /**
  * Web view MessageEvent listener data type. The Devvit API wraps all messages

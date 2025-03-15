@@ -6,7 +6,6 @@ import { SimpleTooltip } from "../simple-tooltip"
 import { MaybeTooltip } from "./maybe-tooltip"
 import { lightenColor } from "../../../../lib/utils/lighten-color"
 import type { ColorTheme } from "./types"
-import { ColorPickerDialog } from "../color-picker-dialog"
 
 interface ColorPickerProps {
   colors: string[]
@@ -90,20 +89,6 @@ export const ColorPicker: React.FC<ColorPickerProps> = ({
             index={index}
           />
         ))}
-
-        {/* Circular color picker button */}
-        <CircularColorPicker />
-
-        {/* Color picker dialog */}
-        <ColorPickerDialog
-          isOpen={isColorPickerOpen}
-          onClose={() => setIsColorPickerOpen(false)}
-          onColorSelect={(color) => {
-            onSelectColor(color)
-            setIsColorPickerOpen(false)
-          }}
-          initialColor={selectedColor}
-        />
       </div>
     </div>
   )
