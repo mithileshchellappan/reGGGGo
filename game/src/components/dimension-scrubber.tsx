@@ -17,7 +17,7 @@ interface DimensionScrubberProps {
 export const DimensionScrubber: React.FC<DimensionScrubberProps> = ({
   value,
   min = 1,
-  max = 20,
+  max = 4,
   onChange,
   label,
   tooltip,

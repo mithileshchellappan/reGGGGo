@@ -3,7 +3,10 @@ export function sendMessage(msg: any): void {
 }
 
 export function onMessage(callback: (msg: any) => void): void {
+    console.log("Listening for messages")
     window.addEventListener("message", (event) => {
-        callback(event.data)
+        if(event.data.type === 'devvit-message') {
+            callback(event.data.data)
+        }
     })
 }

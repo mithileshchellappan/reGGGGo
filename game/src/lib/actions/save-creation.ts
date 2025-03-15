@@ -18,7 +18,7 @@ export async function saveCreation(name: string, bricks: Brick[]) {
       createdAt: timestamp,
       updatedAt: timestamp,
     }
-
+    console.log("creation", creation)
     // Save to Redis
 
     // Add to list of creations

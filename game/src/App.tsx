@@ -9,9 +9,6 @@ function App() {
       type: "webViewReady",
       message: "Hello from Regggo!",
     })
-    onMessage((msg) => {
-      console.log("Message from Devvit:", msg)
-    })
   }, [])
 
   return (

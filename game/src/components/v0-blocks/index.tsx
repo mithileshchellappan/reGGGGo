@@ -49,24 +49,24 @@ export default function V0Blocks() {
   useTouchHandling()
 
   // Set up localStorage persistence
-  // useLocalStorage({
-  //   bricks,
-  //   width,
-  //   depth,
-  //   selectedColor,
-  //   currentTheme,
-  //   currentCreationId,
-  //   currentCreationName,
-  //   setBricks,
-  //   setWidth,
-  //   setDepth,
-  //   setSelectedColor,
-  //   handleThemeChange,
-  //   setCurrentCreationId,
-  //   setCurrentCreationName,
-  //   setHistory,
-  //   setHistoryIndex,
-  // })
+  useLocalStorage({
+    bricks,
+    width,
+    depth,
+    selectedColor,
+    currentTheme,
+    currentCreationId,
+    currentCreationName,
+    setBricks,
+    setWidth,
+    setDepth,
+    setSelectedColor,
+    handleThemeChange,
+    setCurrentCreationId,
+    setCurrentCreationName,
+    setHistory,
+    setHistoryIndex,
+  })
 
   // Wrapper functions that call the imported event handlers with the current state
   const onAddBrick = useCallback(

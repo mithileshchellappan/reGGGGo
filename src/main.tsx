@@ -1,13 +1,15 @@
 import './createPost.js';
 
-import { Devvit, useState, useWebView } from '@devvit/public-api';
+import { Devvit, useChannel, useState, useWebView } from '@devvit/public-api';
 
 import type { DevvitMessage, WebViewMessage } from './message.js';
+import { deleteBrick, getCreation, updateCreation } from './utils/gameUtils.js';
 
 Devvit.configure({
   redditAPI: true,
   redis: true,
-  http:true
+  http:true,
+  realtime: true
 });
 
 Devvit.addMenuItem({
@@ -49,12 +51,13 @@ Devvit.addCustomPostType({
     const [username] = useState(async () => {
       return (await context.reddit.getCurrentUsername()) ?? 'anon';
     });
-
     // Load latest counter from redis with `useAsync` hook
     const [counter, setCounter] = useState(async () => {
       const redisCount = await context.redis.get(`counter_${context.postId}`);
       return Number(redisCount ?? 0);
     });
+
+   
 
     const webView = useWebView<WebViewMessage, DevvitMessage>({
       // URL of your web view content
@@ -66,30 +69,41 @@ Devvit.addCustomPostType({
         switch (message.type) {
           case 'webViewReady':
             console.log("WebView ready")
+            const creation = await getCreation(context)
             webView.postMessage({
               type: 'initialData',
               data: {
                 username: username,
-                currentCounter: counter,
-              },
-            });
-            break;
-          case 'setCounter':
-            await context.redis.set(
-              `counter_${context.postId}`,
-              message.data.newCounter.toString()
-            );
-            setCounter(message.data.newCounter);
-
-            webView.postMessage({
-              type: 'updateCounter',
-              data: {
-                currentCounter: message.data.newCounter,
+                creation: {
+                  bricks: creation.bricks || [],
+                  creationId: context.postId || '',
+                },
               },
             });
             break;
             case 'brickAdded': 
-              console.log("Brick added:", message.data.brick)
+                await updateCreation(context, message.data.brick)
+                if(!context.postId) break;
+                await context.realtime.send(`creation_${context.postId.toString()}_updates`, {
+                  type: 'brickAdded',
+                  username: username,
+                  data: {
+                    brick: message.data.brick,
+                  }
+                })
+              break;
+            case 'brickDeleted':
+              console.log("Brick deleted:", message.data.brick)
+              await deleteBrick(context, message.data.brick)
+              if(!context.postId) break;
+              await context.realtime.send(`creation_${context.postId.toString()}_updates`, {
+                type: 'brickDeleted',
+                username: username,
+                data: {
+                  brick: message.data.brick,
+                  index: message.data.index,
+                }
+              })
               break;
           default:
             throw new Error(`Unknown message type: ${message satisfies never}`);
@@ -99,7 +113,26 @@ Devvit.addCustomPostType({
         context.ui.showToast('Web view closed!');
       },
     });
-
+    if(context.postId) {
+      const channel = useChannel({
+        name: `creation_${context.postId.toString()}_updates`,
+        onMessage: (message: any) => {
+          console.log("Message from channel:", message)
+          if(!message || !webView) return;
+          if(message.username === username) return;
+          if(message.type === 'brickAdded') {
+            console.log("Sending brickAdded message to web view")
+            webView.postMessage({
+              type: 'brickAdded',
+              data: {
+                brick: message.data.brick,
+              }
+            })
+          }
+        }
+      })
+      channel.subscribe()
+    }
     // Render the custom post type
     return (
       <vstack grow padding="small">

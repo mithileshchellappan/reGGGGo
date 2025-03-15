@@ -45,11 +45,19 @@ export const handleDeleteBrick = (
   setHistoryIndex: Dispatch<SetStateAction<number>>,
 ) => {
   const newBricks = bricks.filter((_, i) => i !== index)
+  sendMessage({
+    type: "brickDeleted",
+    data: {
+      index: index,
+      brick: bricks[index],
+    },
+  })
   setBricks(newBricks)
   const newHistory = history.slice(0, historyIndex + 1)
   newHistory.push(newBricks)
   setHistory(newHistory)
   setHistoryIndex(historyIndex + 1)
+  
 }
 
 export const handleUpdateBrick = (

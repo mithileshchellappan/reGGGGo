@@ -4,6 +4,7 @@ import { useEffect, useRef } from "react"
 import type { Brick } from "./events"
 import type { ColorTheme } from "../color-selector/types"
 import { saveToLocalStorage, loadFromLocalStorage, isLocalStorageAvailable } from "../../lib/utils/local-storage"
+import { onMessage, sendMessage } from "../../lib/message-devvit"
 
 interface UseLocalStorageProps {
   bricks: Brick[]
@@ -42,18 +43,36 @@ export function useLocalStorage({
   setHistory,
   setHistoryIndex,
 }: UseLocalStorageProps) {
-  const hasLocalStorage = useRef<boolean>(false)
   const isInitialLoad = useRef<boolean>(true)
   const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null)
 
   // Check if localStorage is available
   useEffect(() => {
-    hasLocalStorage.current = isLocalStorageAvailable()
+    onMessage(({message}) => {
+      console.log("Message from web view:", message)
+      if(message.type == "initialData") {
+        const {creation} = message.data
+        setBricks(creation.bricks)
+        setWidth(2)
+        setDepth(2)
+        setCurrentCreationId(creation.creationId)
+      }
+      if(message.type == "brickAdded") {
+        const {brick} = message.data
+        console.log("all bricks", bricks)
+        const newBricks = [...bricks, brick]
+        console.log("newBricks", newBricks)
+        setBricks(newBricks)
+      }
+      if(message.type == "brickDeleted") {
+        const {brick, index} = message.data
+        setBricks(bricks.filter((_, i) => i !== index))
+      }
+    })
   }, [])
 
   // Load data from localStorage on initial mount
   useEffect(() => {
-    if (!hasLocalStorage.current) return
 
     if (isInitialLoad.current) {
       const savedState = loadFromLocalStorage()
@@ -100,7 +119,6 @@ export function useLocalStorage({
 
   // Save data to localStorage whenever state changes (debounced)
   useEffect(() => {
-    if (!hasLocalStorage.current || isInitialLoad.current) return
 
     // Clear any existing timeout
     if (saveTimeoutRef.current) {
@@ -108,17 +126,14 @@ export function useLocalStorage({
     }
 
     // Set a new timeout to save after 500ms of inactivity
-    saveTimeoutRef.current = setTimeout(() => {
-      saveToLocalStorage({
-        bricks,
-        width,
-        height: depth,
-        selectedColor,
-        currentTheme,
-        creationId: currentCreationId,
-        creationName: currentCreationName,
+    // saveTimeoutRef.current = setTimeout(() => {
+      sendMessage({
+        type: "saveState",
+        data: {
+          bricks
+        }
       })
-    }, 500)
+    // }, 500)
 
     // Cleanup timeout on unmount
     return () => {
