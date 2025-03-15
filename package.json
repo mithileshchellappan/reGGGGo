@@ -5,7 +5,7 @@
   "license": "BSD-3-Clause",
   "type": "module",
   "scripts": {
-    "dev:game": "vite build --watch",
+    "dev:game": "cd game && vite build --watch",
     "dev:devvit": "devvit playtest squidcomb_test",
     "dev": "concurrently -p \"[{name}]\" -n \"DEVVIT,GAME\" -c \"bgBlue.bold,bgMagenta.bold,bgGreen.bold\" \"npm run dev:devvit\" \"npm run dev:game\" --restart-tries 30",
     "vite": "vite",

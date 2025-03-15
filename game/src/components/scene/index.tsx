@@ -96,7 +96,7 @@ export const Scene: React.FC<SceneProps> = ({
 
       <LightingSetup />
       <Environment
-        files="assets/textures/bg-image-gradient.jpg"
+        files="assets/textures/bg-image-gradient.jpeg"
         background
       />
     </>

@@ -62,8 +62,10 @@ Devvit.addCustomPostType({
 
       // Handle messages sent from the web view
       async onMessage(message, webView) {
+        console.log("Message from web view:", message)
         switch (message.type) {
           case 'webViewReady':
+            console.log("WebView ready")
             webView.postMessage({
               type: 'initialData',
               data: {
