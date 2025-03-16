@@ -37,7 +37,6 @@ export const Platform: React.FC = () => {
 
   // Generate stud positions based on current grid size
   const studPositions = useMemo(() => {
-    console.log(`Generating stud positions for grid size: ${currentGridSize}`)
     const positions = []
     for (let x = -currentGridSize / 2 + 0.5; x < currentGridSize / 2; x++) {
       for (let z = -currentGridSize / 2 + 0.5; z < currentGridSize / 2; z++) {
@@ -47,7 +46,6 @@ export const Platform: React.FC = () => {
     return positions
   }, [currentGridSize])
 
-  console.log(`Rendering platform with grid size: ${currentGridSize}`)
 
   return (
     <group>

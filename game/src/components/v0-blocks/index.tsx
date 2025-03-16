@@ -75,7 +75,7 @@ export default function V0Blocks() {
           setBricks(message.data.creation.bricks)
           setUsername(message.data.username)
           break
-        case MessageType.BRICK_ADDED:
+        case MessageType.CHANNEL_BRICK_ADDED:
           // Add brick from another user
           const newBrick = message.data.brick as Brick
           setBricks((prev) => [...prev, newBrick])
@@ -86,11 +86,11 @@ export default function V0Blocks() {
           }
           break
 
-        case MessageType.BRICK_DELETED:
+        case MessageType.CHANNEL_BRICK_DELETED:
           // Delete brick from another user
           const index = message.data.index as number
-          setBricks((prev) => prev.filter((oldBrick, i) => oldBrick !== message.data.brick as Brick))
-
+          setBricks((prev) => prev.filter((_, i) => i !== index))
+          
           // Update brick user mapping
           setBrickUsers((prev) =>
             prev
@@ -134,14 +134,6 @@ export default function V0Blocks() {
 
       handleAddBrick(brick, bricks, setBricks, history, historyIndex, setHistory, setHistoryIndex)
       startCooldown() // Start cooldown after adding a brick
-
-      // Send message for real-time updates
-      sendMessage({
-        type: MessageType.BRICK_ADDED,
-        data: {
-          brick,
-        },
-      })
     },
     [bricks, history, historyIndex, isInCooldown, startCooldown],
   )
@@ -168,14 +160,6 @@ export default function V0Blocks() {
 
       handleDeleteBrick(index, bricks, setBricks, history, historyIndex, setHistory, setHistoryIndex)
       startCooldown() 
-
-      sendMessage({
-        type: MessageType.BRICK_DELETED,
-        data: {
-          index,
-          brick: bricks[index],
-        },
-      })
     },
     [bricks, history, historyIndex, isInCooldown, startCooldown],
   )

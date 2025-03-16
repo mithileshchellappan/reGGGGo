@@ -1,3 +1,5 @@
+import { sendMessage } from "../../lib/real-time"
+import { MessageType } from "../../lib/real-time"
 import type { Dispatch, SetStateAction } from "react"
 
 // Define types for our brick and history
@@ -14,13 +16,22 @@ export type BrickHistory = Brick[][]
 // Event handlers
 // Add these functions to emit events when bricks are added or deleted
 export const emitBrickAdded = (brick: Brick) => {
-  const event = new CustomEvent("brickAdded", { detail: brick })
-  window.dispatchEvent(event)
+  sendMessage({
+    type: MessageType.BRICK_ADDED,
+    data: {
+      brick,
+    },
+  })
 }
 
-export const emitBrickDeleted = (index: number) => {
-  const event = new CustomEvent("brickDeleted", { detail: { index } })
-  window.dispatchEvent(event)
+export const emitBrickDeleted = (index: number, bricks: Brick[]) => {
+  sendMessage({
+    type: MessageType.BRICK_DELETED,
+    data: {
+      index,
+      brick: bricks[index],
+    },
+  })
 }
 
 // Modify the handleAddBrick function to emit an event
@@ -56,13 +67,14 @@ export const handleDeleteBrick = (
 ) => {
   const newBricks = bricks.filter((_, i) => i !== index)
   setBricks(newBricks)
+  console.log("newBricks", bricks, newBricks, newBricks === bricks)
   const newHistory = history.slice(0, historyIndex + 1)
   newHistory.push(newBricks)
   setHistory(newHistory)
   setHistoryIndex(historyIndex + 1)
 
   // Emit the brick deleted event
-  emitBrickDeleted(index)
+  emitBrickDeleted(index, bricks)
 }
 
 export const handleUpdateBrick = (

@@ -124,7 +124,7 @@ Devvit.addCustomPostType({
           if(message.type === 'brickAdded') {
             console.log("Sending brickAdded message to web view")
             webView.postMessage({
-              type: 'brickAdded',
+              type: 'channelBrickAdded',
               data: {
                 brick: message.data.brick,
               }
@@ -133,7 +133,7 @@ Devvit.addCustomPostType({
           if(message.type === 'brickDeleted') {
             console.log("Sending brickDeleted message to web view")
             webView.postMessage({
-              type: 'brickDeleted',
+              type: 'channelBrickDeleted',
               data: message.data,
             })
           }

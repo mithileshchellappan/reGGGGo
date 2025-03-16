@@ -21,7 +21,9 @@ export enum MessageType {
   CANVAS_RESIZE = "canvasResize",
   USER_JOINED = "userJoined",
   USER_LEFT = "userLeft",
-  INITIAL_DATA="initialData"
+  INITIAL_DATA="initialData",
+  CHANNEL_BRICK_ADDED = "channelBrickAdded",
+  CHANNEL_BRICK_DELETED = "channelBrickDeleted",
 }
 
 // User type

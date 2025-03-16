@@ -69,7 +69,6 @@ export const Scene: React.FC<SceneProps> = ({
           key={index}
           color={brick.color}
           position={brick.position}
-          username={brick.username}
           width={brick.width}
           height={brick.height}
           isPlacing={hoveredBrickIndex === index && (interactionMode === "erase" || interactionMode === "move")}
