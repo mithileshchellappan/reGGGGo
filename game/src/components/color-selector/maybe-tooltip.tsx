@@ -1,3 +1,5 @@
+"use client"
+
 import type React from "react"
 import { SimpleTooltip } from "../simple-tooltip"
 
@@ -9,7 +11,7 @@ interface MaybeTooltipProps {
 
 export const MaybeTooltip: React.FC<MaybeTooltipProps> = ({ text, children, isMobile }) => {
   if (isMobile) {
-    return <>{children}</>
+    return children
   }
 
   return (

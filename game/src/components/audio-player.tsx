@@ -10,20 +10,20 @@ export const AudioPlayer: React.FC = () => {
 
   // useEffect(() => {
   //   audioRef.current = new Audio(
-  //     "assets/audio/bg-audio.mp3",
+  //     "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Pixel%20Dreams-wNU5nif9OTg2n5YIcFd3j8bteFV2As.mp3",
   //   )
   //   audioRef.current.loop = true
   // }, [])
 
-  useEffect(() => {
-    if (audioRef.current) {
-      if (isMuted) {
-        audioRef.current.pause()
-      } else {
-        audioRef.current.play()
-      }
-    }
-  }, [isMuted])
+  // useEffect(() => {
+  //   if (audioRef.current) {
+  //     if (isMuted) {
+  //       audioRef.current.pause()
+  //     } else {
+  //       audioRef.current.play()
+  //     }
+  //   }
+  // }, [isMuted])
 
   return (
     <button

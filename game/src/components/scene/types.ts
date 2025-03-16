@@ -1,4 +1,5 @@
-import type { Brick } from "../v0-blocks/events"
+import type { Brick } from "@/components/v0-blocks/events"
+import type { User, BrickWithUser } from "@/lib/real-time"
 
 export interface SceneProps {
   bricks: Brick[]
@@ -11,5 +12,11 @@ export interface SceneProps {
   onRedo: () => void
   isPlaying: boolean
   interactionMode?: "build" | "move" | "erase"
+  isInCooldown?: boolean
+  timeRemaining?: number
+  totalTime?: number
+  brickUsers?: BrickWithUser[]
+  users?: User[]
+  onUserHover?: (user: User | null, position: { x: number; y: number }) => void
 }
 

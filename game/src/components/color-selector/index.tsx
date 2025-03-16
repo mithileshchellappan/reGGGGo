@@ -6,7 +6,7 @@ import type { ColorSelectorProps } from "./types"
 import { HistoryControls } from "./history-controls"
 import { ColorPicker } from "./color-picker"
 import { DimensionControls } from "./dimension-controls"
-import { ActionControls } from "./action-controls"
+import { FileControls } from "./file-controls"
 import { MobileMenu } from "./mobile-menu"
 
 export const ColorSelector: React.FC<ColorSelectorProps> = ({
@@ -26,8 +26,6 @@ export const ColorSelector: React.FC<ColorSelectorProps> = ({
   isPlaying,
   onSave,
   onLoad,
-  currentCreationId,
-  currentCreationName,
   currentTheme,
   onThemeChange,
   bricksCount,
@@ -51,9 +49,9 @@ export const ColorSelector: React.FC<ColorSelectorProps> = ({
       <div className="bg-gradient-to-b from-gray-800 to-gray-900 backdrop-blur-md px-6 py-3 rounded-[28px] shadow-lg border border-gray-700 text-white">
         <div className="flex items-center gap-3">
           {/* History Controls */}
-          {/* <HistoryControls onUndo={onUndo} onRedo={onRedo} canUndo={canUndo} canRedo={canRedo} isMobile={isMobile} /> */}
+          <HistoryControls onUndo={onUndo} onRedo={onRedo} canUndo={canUndo} canRedo={canRedo} isMobile={isMobile} />
 
-          {/* <div className="w-px h-6 bg-gray-600" /> */}
+          <div className="w-px h-6 bg-gray-600" />
 
           {/* Color Selector */}
           <ColorPicker
@@ -80,7 +78,7 @@ export const ColorSelector: React.FC<ColorSelectorProps> = ({
 
           {/* Desktop: Action Buttons */}
           {!isMobile && (
-            <ActionControls
+            <FileControls
               onPlayToggle={onPlayToggle}
               isPlaying={isPlaying}
               onClearSet={onClearSet}
@@ -94,8 +92,6 @@ export const ColorSelector: React.FC<ColorSelectorProps> = ({
             <MobileMenu
               onPlayToggle={onPlayToggle}
               isPlaying={isPlaying}
-              onSave={onSave}
-              onLoad={onLoad}
               onClearSet={onClearSet}
               hasBricks={bricksCount > 0}
             />

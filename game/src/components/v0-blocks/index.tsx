@@ -1,21 +1,25 @@
 "use client"
 
-import { useState, useRef, useCallback } from "react"
+import { useState, useRef, useCallback, useEffect } from "react"
 import { Canvas } from "@react-three/fiber"
 import { OrbitControls } from "@react-three/drei"
-import { Pause } from "lucide-react"
+import { Pause, Settings } from "lucide-react"
 import { AudioPlayer } from "../audio-player"
 import { Scene } from "../scene"
 import { ColorSelector } from "../color-selector"
 import { ActionToolbar } from "../action-toolbar"
 import { ClearConfirmationModal } from "./clear-confirmation-modal"
+import { CanvasResizeModal } from "../canvas-resize-modal"
+import { UserHoverCard } from "../user-hover-card"
 import { useKeyboardShortcuts } from "./use-keyboard-shortcuts"
 import { useColorTheme } from "./use-color-theme"
 import { useTouchHandling } from "./use-touch-handling"
-import { useLocalStorage } from "./use-local-storage"
-import { clearLocalStorage } from "../../../../lib/utils/local-storage"
+import { useCooldown } from "./use-cooldown"
+import { CooldownIndicator } from "../cooldown-indicator"
+import { DEFAULT_TIMER_DURATION, GRID_SIZE, MAX_GRID_SIZE, updateGridSize } from "../../lib/constants"
+import { sendMessage, onMessage, MessageType, type User, type BrickWithUser } from "../../lib/real-time"
+import type { Brick } from "./events"
 import {
-  type Brick,
   handleAddBrick,
   handleDeleteBrick,
   handleUpdateBrick,
@@ -42,45 +46,136 @@ export default function V0Blocks() {
 
   // Modal state
   const [showClearModal, setShowClearModal] = useState(false)
-  const [currentCreationId, setCurrentCreationId] = useState<string | undefined>()
-  const [currentCreationName, setCurrentCreationName] = useState<string | undefined>()
+  const [showResizeModal, setShowResizeModal] = useState(false)
+
+  // Timer state
+  const [totalTime, setTotalTime] = useState(DEFAULT_TIMER_DURATION)
+  const [timerActive, setTimerActive] = useState(false)
+
+  // User state
+  const [users, setUsers] = useState<User[]>([])
+  const [brickUsers, setBrickUsers] = useState<BrickWithUser[]>([])
+  const [hoveredUser, setHoveredUser] = useState<User | null>(null)
+  const [hoveredUserPosition, setHoveredUserPosition] = useState({ x: 0, y: 0 })
+
+  // Cooldown state
+  const { isInCooldown, cooldownRemaining, startCooldown } = useCooldown(3000) // 5 seconds cooldown
 
   // Set up touch handling
   useTouchHandling()
 
-  // Set up localStorage persistence
-  useLocalStorage({
-    bricks,
-    width,
-    depth,
-    selectedColor,
-    currentTheme,
-    currentCreationId,
-    currentCreationName,
-    setBricks,
-    setWidth,
-    setDepth,
-    setSelectedColor,
-    handleThemeChange,
-    setCurrentCreationId,
-    setCurrentCreationName,
-    setHistory,
-    setHistoryIndex,
-  })
+  // Handle real-time messages
+  useEffect(() => {
+    onMessage(({message}) => {
+      console.log("Received message:", message)
+
+      switch (message.type) {
+        case MessageType.INITIAL_DATA:
+          setBricks(message.data.creation.bricks)
+          break
+        case MessageType.BRICK_ADDED:
+          // Add brick from another user
+          const newBrick = message.data.brick as Brick
+          setBricks((prev) => [...prev, newBrick])
+
+          // Update brick user mapping
+          if (message.userId) {
+            setBrickUsers((prev) => [...prev, { brickIndex: bricks.length, userId: message.userId }])
+          }
+          break
+
+        case MessageType.BRICK_DELETED:
+          // Delete brick from another user
+          const index = message.data.index as number
+          setBricks((prev) => prev.filter((_, i) => i !== index))
+
+          // Update brick user mapping
+          setBrickUsers((prev) =>
+            prev
+              .filter((bu) => bu.brickIndex !== index)
+              // Adjust indices for bricks after the deleted one
+              .map((bu) => (bu.brickIndex > index ? { ...bu, brickIndex: bu.brickIndex - 1 } : bu)),
+          )
+          break
+
+        case MessageType.TIMER_UPDATE:
+          // Update timer
+          setTotalTime(message.totalTime)
+          setTimerActive(message.active)
+          break
+
+        case MessageType.CANVAS_RESIZE:
+          // Resize canvas
+          const newSize = message.size as number
+          updateGridSize(newSize)
+          break
+
+        case MessageType.USER_JOINED:
+          // Add user
+          const newUser = message.user as User
+          setUsers((prev) => [...prev.filter((u) => u.id !== newUser.id), newUser])
+          break
+
+        case MessageType.USER_LEFT:
+          // Remove user
+          const userId = message.userId as string
+          setUsers((prev) => prev.filter((u) => u.id !== userId))
+          break
+      }
+    })
+  }, [bricks.length])
 
   // Wrapper functions that call the imported event handlers with the current state
   const onAddBrick = useCallback(
     (brick: Brick) => {
+      if (isInCooldown) return // Don't add brick if in cooldown
+
       handleAddBrick(brick, bricks, setBricks, history, historyIndex, setHistory, setHistoryIndex)
+      startCooldown() // Start cooldown after adding a brick
+
+      // Send message for real-time updates
+      sendMessage({
+        type: MessageType.BRICK_ADDED,
+        data: {
+          brick,
+        },
+      })
     },
-    [bricks, history, historyIndex],
+    [bricks, history, historyIndex, isInCooldown, startCooldown],
   )
+
+  // const onDeleteBrick = useCallback(
+  //   (index: number) => {
+  //     handleDeleteBrick(index, bricks, setBricks, history, historyIndex, setHistory, setHistoryIndex)
+
+  //     // Send message for real-time updates
+  //     sendMessage({
+  //       type: MessageType.BRICK_DELETED,
+  //       data: {
+  //         index,
+  //         brick: bricks[index],
+  //       },
+  //     })
+  //   },
+  //   [bricks, history, historyIndex],
+  // )
 
   const onDeleteBrick = useCallback(
     (index: number) => {
+      if (isInCooldown) return
+
       handleDeleteBrick(index, bricks, setBricks, history, historyIndex, setHistory, setHistoryIndex)
+      startCooldown() 
+
+      sendMessage({
+        type: MessageType.BRICK_DELETED,
+        data: {
+          index,
+          brick: bricks[index],
+        },
+      })
     },
-    [bricks, history, historyIndex],
+    [bricks, history, historyIndex, isInCooldown, startCooldown],
   )
 
   const onUpdateBrick = useCallback(
@@ -103,11 +198,6 @@ export default function V0Blocks() {
   const onClearSet = useCallback(() => {
     console.log("Clear set triggered")
     handleClearSet(setBricks, setHistory, setHistoryIndex)
-    // Clear current creation info when clearing the set
-    setCurrentCreationId(undefined)
-    setCurrentCreationName(undefined)
-    // Clear localStorage
-    clearLocalStorage()
     // Close the modal
     setShowClearModal(false)
   }, [])
@@ -125,15 +215,27 @@ export default function V0Blocks() {
 
   const handleModeChange = useCallback((mode: "build" | "move" | "erase") => {
     setInteractionMode(mode)
+
+    // Clear hovered user when changing modes
+    if (mode !== "move") {
+      setHoveredUser(null)
+    }
   }, [])
 
-  // Dummy save/load handlers
-  const handleSave = useCallback(() => {
-    console.log("Save functionality removed")
+  const handleCanvasResize = useCallback((size: number) => {
+    const newSize = updateGridSize(size)
+    console.log(`Canvas resized to ${newSize}x${newSize}`)
+
+    // Send message for real-time updates
+    sendMessage({
+      type: MessageType.CANVAS_RESIZE,
+      size: newSize,
+    })
   }, [])
 
-  const handleLoad = useCallback(() => {
-    console.log("Load functionality removed")
+  const handleUserHover = useCallback((user: User | null, position: { x: number; y: number }) => {
+    setHoveredUser(user)
+    setHoveredUserPosition(position)
   }, [])
 
   // Set up keyboard shortcuts
@@ -150,8 +252,8 @@ export default function V0Blocks() {
     onRedo,
     onPlayToggle,
     handleClearWithConfirmation,
-    handleSave,
-    handleLoad,
+    handleSave: () => {}, // Empty function since we removed save functionality
+    handleLoad: () => {}, // Empty function since we removed load functionality
     currentTheme,
     handleThemeChange,
   })
@@ -173,6 +275,11 @@ export default function V0Blocks() {
           onRedo={onRedo}
           isPlaying={isPlaying}
           interactionMode={interactionMode}
+          isInCooldown={isInCooldown}
+          totalTime={totalTime}
+          brickUsers={brickUsers}
+          users={users}
+          onUserHover={handleUserHover}
         />
         <OrbitControls
           ref={orbitControlsRef}
@@ -188,6 +295,16 @@ export default function V0Blocks() {
           enableRotate={!isPlaying && interactionMode === "move"}
         />
       </Canvas>
+
+      {/* Settings button */}
+      <button
+        onClick={() => setShowResizeModal(true)}
+        className="fixed top-4 left-20 z-50 bg-black/70 rounded-full p-2 text-white"
+        aria-label="Canvas Settings"
+      >
+        <Settings className="w-5 h-5" />
+      </button>
+
       {!isPlaying && (
         <>
           <ActionToolbar onModeChange={handleModeChange} currentMode={interactionMode} />
@@ -206,15 +323,21 @@ export default function V0Blocks() {
             onClearSet={handleClearWithConfirmation}
             onPlayToggle={onPlayToggle}
             isPlaying={isPlaying}
-            onSave={handleSave}
-            onLoad={handleLoad}
-            currentCreationId={currentCreationId}
-            currentCreationName={currentCreationName}
+            onSave={() => {}} // Empty function since we removed save functionality
+            onLoad={() => {}} // Empty function since we removed load functionality
             currentTheme={currentTheme}
             onThemeChange={handleThemeChange}
             bricksCount={bricks.length}
           />
           <AudioPlayer />
+          {isInCooldown && <CooldownIndicator remainingTime={cooldownRemaining} />}
+
+          {/* User hover card */}
+          <UserHoverCard
+            user={hoveredUser}
+            position={hoveredUserPosition}
+            visible={interactionMode === "move" && hoveredUser !== null}
+          />
         </>
       )}
       {isPlaying && (
@@ -229,6 +352,13 @@ export default function V0Blocks() {
 
       {/* Modals */}
       <ClearConfirmationModal isOpen={showClearModal} onClose={() => setShowClearModal(false)} onClear={onClearSet} />
+      <CanvasResizeModal
+        isOpen={showResizeModal}
+        onClose={() => setShowResizeModal(false)}
+        onResize={handleCanvasResize}
+        currentSize={GRID_SIZE}
+        maxSize={MAX_GRID_SIZE}
+      />
     </div>
   )
 }

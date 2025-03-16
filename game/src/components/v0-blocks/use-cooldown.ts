@@ -15,7 +15,7 @@ export function useCooldown(cooldownDuration = 3000) {
 
     const elapsed = Date.now() - cooldownStartTimeRef.current
     const remaining = Math.max(0, cooldownDuration - elapsed)
-
+    console.log("remaining", remaining)
     setCooldownRemaining(remaining)
 
     if (remaining <= 0) {

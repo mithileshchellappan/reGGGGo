@@ -15,12 +15,13 @@ export function onMessage(callback: (msg: any) => void): void {
 
 // Message types
 export enum MessageType {
-  BRICK_ADDED = "BRICK_ADDED",
-  BRICK_DELETED = "BRICK_DELETED",
-  TIMER_UPDATE = "TIMER_UPDATE",
-  CANVAS_RESIZE = "CANVAS_RESIZE",
-  USER_JOINED = "USER_JOINED",
-  USER_LEFT = "USER_LEFT",
+  BRICK_ADDED = "brickAdded",
+  BRICK_DELETED = "brickDeleted",
+  TIMER_UPDATE = "timerUpdate",
+  CANVAS_RESIZE = "canvasResize",
+  USER_JOINED = "userJoined",
+  USER_LEFT = "userLeft",
+  INITIAL_DATA="initialData"
 }
 
 // User type

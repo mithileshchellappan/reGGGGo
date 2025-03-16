@@ -1,38 +1,76 @@
 "use client"
 
 import type React from "react"
-import { useMemo } from "react"
+import { useMemo, useEffect, useState } from "react"
 import * as THREE from "three"
-import { Instances, Instance } from "@react-three/drei"
-import { GRID_SIZE, GROUND_HEIGHT, STUD_HEIGHT, STUD_RADIUS } from "../constants"
+import { GRID_SIZE, GROUND_HEIGHT, STUD_HEIGHT, STUD_RADIUS, STUD_SEGMENTS } from "../lib/constants"
 
 export const Platform: React.FC = () => {
-  const studGeometry = useMemo(() => new THREE.CylinderGeometry(STUD_RADIUS, STUD_RADIUS, STUD_HEIGHT, 12), [])
+  // Track grid size changes
+  const [currentGridSize, setCurrentGridSize] = useState(GRID_SIZE)
+
+  // Update when GRID_SIZE changes
+  useEffect(() => {
+    const handleGridSizeChange = (event: CustomEvent) => {
+      console.log(`Grid size changed event received: ${event.detail.size}`)
+      setCurrentGridSize(event.detail.size)
+    }
+
+    // Initial check
+    if (GRID_SIZE !== currentGridSize) {
+      console.log(`Initial grid size update: ${GRID_SIZE}`)
+      setCurrentGridSize(GRID_SIZE)
+    }
+
+    // Listen for grid size changes
+    window.addEventListener("gridSizeChanged", handleGridSizeChange as EventListener)
+
+    return () => {
+      window.removeEventListener("gridSizeChanged", handleGridSizeChange as EventListener)
+    }
+  }, [currentGridSize])
+
+  const studGeometry = useMemo(
+    () => new THREE.CylinderGeometry(STUD_RADIUS, STUD_RADIUS, STUD_HEIGHT, STUD_SEGMENTS),
+    [],
+  )
+
+  // Generate stud positions based on current grid size
   const studPositions = useMemo(() => {
-    const positions: [number, number, number][] = []
-    for (let x = -GRID_SIZE / 2 + 0.5; x < GRID_SIZE / 2; x++) {
-      for (let z = -GRID_SIZE / 2 + 0.5; z < GRID_SIZE / 2; z++) {
+    console.log(`Generating stud positions for grid size: ${currentGridSize}`)
+    const positions = []
+    for (let x = -currentGridSize / 2 + 0.5; x < currentGridSize / 2; x++) {
+      for (let z = -currentGridSize / 2 + 0.5; z < currentGridSize / 2; z++) {
         positions.push([x, GROUND_HEIGHT / 2 + STUD_HEIGHT / 2, z])
       }
     }
     return positions
-  }, [])
+  }, [currentGridSize])
 
-  // Calculate the actual number of studs based on the grid loops
-  const studCount = Math.ceil(GRID_SIZE) * Math.ceil(GRID_SIZE)
+  console.log(`Rendering platform with grid size: ${currentGridSize}`)
 
   return (
     <group>
+      {/* Base platform */}
       <mesh position={[0, 0, 0]} receiveShadow>
-        <boxGeometry args={[GRID_SIZE, GROUND_HEIGHT, GRID_SIZE]} />
+        <boxGeometry args={[currentGridSize, GROUND_HEIGHT, currentGridSize]} />
         <meshStandardMaterial color="#ffffff" roughness={0.8} metalness={0.1} />
       </mesh>
-      <Instances geometry={studGeometry} limit={studCount}>
-        <meshStandardMaterial color="#ffffff" roughness={0.8} metalness={0.1} />
+
+      {/* Studs */}
+      <group key={`studs-${currentGridSize}`}>
         {studPositions.map((pos, index) => (
-          <Instance key={index} position={pos as [number, number, number]} castShadow receiveShadow />
+          <mesh
+            key={`stud-${index}-${currentGridSize}`}
+            position={[pos[0], pos[1], pos[2]]}
+            geometry={studGeometry}
+            castShadow
+            receiveShadow
+          >
+            <meshStandardMaterial color="#ffffff" roughness={0.8} metalness={0.1} />
+          </mesh>
         ))}
-      </Instances>
+      </group>
     </group>
   )
 }

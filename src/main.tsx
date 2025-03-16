@@ -106,6 +106,7 @@ Devvit.addCustomPostType({
               })
               break;
           default:
+            console.log(message)
             throw new Error(`Unknown message type: ${message satisfies never}`);
         }
       },
@@ -127,6 +128,13 @@ Devvit.addCustomPostType({
               data: {
                 brick: message.data.brick,
               }
+            })
+          }
+          if(message.type === 'brickDeleted') {
+            console.log("Sending brickDeleted message to web view")
+            webView.postMessage({
+              type: 'brickDeleted',
+              data: message.data,
             })
           }
         }

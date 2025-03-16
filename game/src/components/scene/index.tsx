@@ -10,7 +10,8 @@ import { EraseMode } from "./erase-mode"
 import { LightingSetup } from "./lighting-setup"
 import { useSceneInteraction } from "./use-scene-interaction"
 import { Block } from "../block"
-import { GRID_SIZE } from "../../constants"
+import { GRID_SIZE } from "@/lib/constants"
+import { ClockAnimation } from "../clock-animation"
 
 export const Scene: React.FC<SceneProps> = ({
   bricks,
@@ -23,6 +24,12 @@ export const Scene: React.FC<SceneProps> = ({
   onRedo,
   isPlaying,
   interactionMode = "build",
+  isInCooldown = false,
+  timeRemaining = 0,
+  totalTime = 0,
+  brickUsers = [],
+  users = [],
+  onUserHover,
 }) => {
   const {
     currentBrickPosition,
@@ -44,6 +51,10 @@ export const Scene: React.FC<SceneProps> = ({
     onDeleteBrick,
     isPlaying,
     interactionMode,
+    isInCooldown,
+    brickUsers,
+    users,
+    onUserHover,
   })
 
   return (
@@ -60,7 +71,7 @@ export const Scene: React.FC<SceneProps> = ({
           position={brick.position}
           width={brick.width}
           height={brick.height}
-          isPlacing={hoveredBrickIndex === index && interactionMode === "erase"}
+          isPlacing={hoveredBrickIndex === index && (interactionMode === "erase" || interactionMode === "move")}
           onClick={() => handleBrickClick(index)}
         />
       ))}
@@ -78,6 +89,11 @@ export const Scene: React.FC<SceneProps> = ({
       )}
 
       {interactionMode === "erase" && !isPlaying && <EraseMode />}
+
+      {/* Clock animation */}
+      {false && timeRemaining > 0 && (
+        <ClockAnimation timeRemaining={timeRemaining} totalTime={totalTime} position={[0, 15, -GRID_SIZE / 2 - 5]} />
+      )}
 
       {/* The plane is always present but only interactive when not playing and in build mode */}
       <mesh

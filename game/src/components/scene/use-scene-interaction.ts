@@ -3,8 +3,9 @@
 import { useState, useRef, useEffect } from "react"
 import * as THREE from "three"
 import { useFrame, useThree } from "@react-three/fiber"
-import { GRID_SIZE, BRICK_HEIGHT, LAYER_GAP, GROUND_HEIGHT } from "../../constants"
-import type { Brick } from "../../components/v0-blocks/events"
+import { GRID_SIZE, BRICK_HEIGHT, LAYER_GAP, GROUND_HEIGHT } from "@/lib/constants"
+import type { Brick } from "@/components/v0-blocks/events"
+import type { User, BrickWithUser } from "@/lib/real-time"
 
 interface UseSceneInteractionProps {
   bricks: Brick[]
@@ -15,6 +16,10 @@ interface UseSceneInteractionProps {
   onDeleteBrick?: (index: number) => void
   isPlaying: boolean
   interactionMode: "build" | "move" | "erase"
+  isInCooldown?: boolean
+  brickUsers?: BrickWithUser[]
+  users?: User[]
+  onUserHover?: (user: User | null, position: { x: number; y: number }) => void
 }
 
 export function useSceneInteraction({
@@ -26,6 +31,10 @@ export function useSceneInteraction({
   onDeleteBrick,
   isPlaying,
   interactionMode,
+  isInCooldown = false,
+  brickUsers = [],
+  users = [],
+  onUserHover,
 }: UseSceneInteractionProps) {
   const [currentBrickPosition, setCurrentBrickPosition] = useState<[number, number, number]>([
     0,
@@ -45,7 +54,7 @@ export function useSceneInteraction({
   const [hasMoved, setHasMoved] = useState(false)
   const touchMoveThreshold = 10 // pixels
 
-  const { camera, raycaster, mouse } = useThree()
+  const { camera, raycaster, mouse, gl } = useThree()
   const planeRef = useRef<THREE.Mesh>(null)
 
   // Detect mobile device
@@ -101,13 +110,21 @@ export function useSceneInteraction({
   }
 
   const isValidPlacement = (position: [number, number, number], width: number, depth: number) => {
+    // Get the current grid size value directly
+    const currentGridSize = GRID_SIZE
+
     const [x, y, z] = position
     const left = Math.floor(x - width / 2)
     const right = Math.ceil(x + width / 2)
     const top = Math.floor(z - depth / 2)
     const bottom = Math.ceil(z + depth / 2)
 
-    if (left < -GRID_SIZE / 2 || right > GRID_SIZE / 2 || top < -GRID_SIZE / 2 || bottom > GRID_SIZE / 2) {
+    if (
+      left < -currentGridSize / 2 ||
+      right > currentGridSize / 2 ||
+      top < -currentGridSize / 2 ||
+      bottom > currentGridSize / 2
+    ) {
       return false
     }
 
@@ -168,6 +185,17 @@ export function useSceneInteraction({
     return null
   }
 
+  // Find user associated with a brick
+  const findUserForBrick = (brickIndex: number): User | null => {
+    if (!brickUsers || !users) return null
+
+    const brickUser = brickUsers.find((bu) => bu.brickIndex === brickIndex)
+    if (!brickUser) return null
+
+    const user = users.find((u) => u.id === brickUser.userId)
+    return user || null
+  }
+
   useFrame(() => {
     // Skip raycaster calculations when in play mode or when deleting
     if (isPlaying || isDeleting) return
@@ -191,16 +219,45 @@ export function useSceneInteraction({
       }
     }
 
-    // Handle erase mode - check for brick intersections
-    // Only highlight bricks on desktop, not on mobile
-    if (interactionMode === "erase" && !isDeleting && !touchedBrickIndex && !isMobile) {
+    // Handle erase mode or move mode - check for brick intersections
+    if ((interactionMode === "erase" || interactionMode === "move") && !isDeleting && !touchedBrickIndex && !isMobile) {
       // Reset hovered brick index
+      const prevHoveredIndex = hoveredBrickIndex
       setHoveredBrickIndex(null)
 
       // Find brick at pointer
       const brickIndex = findBrickAtPointer()
       if (brickIndex !== null) {
         setHoveredBrickIndex(brickIndex)
+
+        // If in move mode and we have a user hover callback, show user info
+        if (interactionMode === "move" && onUserHover && brickIndex !== prevHoveredIndex) {
+          const user = findUserForBrick(brickIndex)
+
+          // Convert 3D position to screen coordinates
+          if (user) {
+            // Get the brick position
+            const brick = bricks[brickIndex]
+            const brickPosition = new THREE.Vector3(
+              brick.position[0],
+              brick.position[1] + BRICK_HEIGHT / 2 + 0.5, // Position above the brick
+              brick.position[2],
+            )
+
+            // Project to screen coordinates
+            const screenPosition = brickPosition.project(camera)
+            const x = (screenPosition.x * 0.5 + 0.5) * gl.domElement.clientWidth
+            const y = (-(screenPosition.y * 0.5) + 0.5) * gl.domElement.clientHeight
+
+            onUserHover(user, { x, y })
+          } else if (prevHoveredIndex !== null && prevHoveredIndex !== brickIndex) {
+            // Clear hover if we moved to a brick without a user
+            onUserHover(null, { x: 0, y: 0 })
+          }
+        }
+      } else if (interactionMode === "move" && onUserHover && prevHoveredIndex !== null) {
+        // Clear hover if we're not hovering over any brick
+        onUserHover(null, { x: 0, y: 0 })
       }
     }
   })
@@ -212,6 +269,12 @@ export function useSceneInteraction({
     if (isPlaying) return
 
     if (interactionMode === "build" && isPlacing && isValid && showNewBrick) {
+      if (isInCooldown) {
+        // Don't add brick if in cooldown
+        console.log("In cooldown, can't add brick yet")
+        return
+      }
+
       onAddBrick({ color: selectedColor, position: currentBrickPosition, width, height: depth })
     }
   }
@@ -275,6 +338,12 @@ export function useSceneInteraction({
     if (interactionMode === "build") {
       // If didn't move (or moved very little), consider it a tap to place a brick
       if (touchStartPosition && !hasMoved && isValid && showNewBrick) {
+        if (isInCooldown) {
+          // Don't add brick if in cooldown
+          console.log("In cooldown, can't add brick yet")
+          return
+        }
+
         onAddBrick({ color: selectedColor, position: currentBrickPosition, width, height: depth })
       }
     } else if (interactionMode === "erase" && touchedBrickIndex !== null) {

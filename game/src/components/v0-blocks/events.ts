@@ -1,4 +1,3 @@
-import { sendMessage } from "../../lib/message-devvit"
 import type { Dispatch, SetStateAction } from "react"
 
 // Define types for our brick and history
@@ -12,6 +11,18 @@ export type Brick = {
 export type BrickHistory = Brick[][]
 
 // Event handlers
+// Add these functions to emit events when bricks are added or deleted
+export const emitBrickAdded = (brick: Brick) => {
+  const event = new CustomEvent("brickAdded", { detail: brick })
+  window.dispatchEvent(event)
+}
+
+export const emitBrickDeleted = (index: number) => {
+  const event = new CustomEvent("brickDeleted", { detail: { index } })
+  window.dispatchEvent(event)
+}
+
+// Modify the handleAddBrick function to emit an event
 export const handleAddBrick = (
   brick: Brick,
   bricks: Brick[],
@@ -27,14 +38,12 @@ export const handleAddBrick = (
   newHistory.push(newBricks)
   setHistory(newHistory)
   setHistoryIndex(historyIndex + 1)
-  sendMessage({
-    type: "brickAdded",
-    data: {
-      brick: brick,
-    },
-  })
+
+  // Emit the brick added event
+  emitBrickAdded(brick)
 }
 
+// Modify the handleDeleteBrick function to emit an event
 export const handleDeleteBrick = (
   index: number,
   bricks: Brick[],
@@ -45,19 +54,14 @@ export const handleDeleteBrick = (
   setHistoryIndex: Dispatch<SetStateAction<number>>,
 ) => {
   const newBricks = bricks.filter((_, i) => i !== index)
-  sendMessage({
-    type: "brickDeleted",
-    data: {
-      index: index,
-      brick: bricks[index],
-    },
-  })
   setBricks(newBricks)
   const newHistory = history.slice(0, historyIndex + 1)
   newHistory.push(newBricks)
   setHistory(newHistory)
   setHistoryIndex(historyIndex + 1)
-  
+
+  // Emit the brick deleted event
+  emitBrickDeleted(index)
 }
 
 export const handleUpdateBrick = (
