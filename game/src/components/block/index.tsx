@@ -19,6 +19,7 @@ export const Block: React.FC<BlockProps> = ({
   opacity = 1,
   onClick,
   username = 'test',
+  isInCooldown = false,
 }) => {
   const [isHovered, setIsHovered] = useState(false)
   const depth = height
@@ -148,8 +149,8 @@ export const Block: React.FC<BlockProps> = ({
         ))}
       </Instances>
 
-      {/* Username tooltip */}
-      {username && isHovered && !isPlacing && (
+      {/* Username tooltip - hide when in cooldown */}
+      {username && isHovered && !isPlacing && !isInCooldown && (
         <Html position={[0, BRICK_HEIGHT, 0]} center distanceFactor={10}>
           <div className="bg-black/80 text-white px-2 py-1 rounded-md text-sm whitespace-nowrap">{username}</div>
         </Html>

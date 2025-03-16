@@ -72,6 +72,7 @@ export const Scene: React.FC<SceneProps> = ({
           username={brick.username}
           isPlacing={hoveredBrickIndex === index && (interactionMode === "erase" || interactionMode === "move")}
           onClick={() => handleBrickClick(brick,index)}
+          isInCooldown={isInCooldown}
         />
       ))}
 

@@ -8,5 +8,6 @@ export interface BlockProps {
   opacity?: number
   username?: string
   onClick?: () => void
+  isInCooldown?: boolean
 }
 
