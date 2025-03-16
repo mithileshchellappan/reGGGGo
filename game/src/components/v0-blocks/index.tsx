@@ -15,6 +15,7 @@ import { useColorTheme } from "./use-color-theme"
 import { useTouchHandling } from "./use-touch-handling"
 import { useCooldown } from "./use-cooldown"
 import { CooldownIndicator } from "../cooldown-indicator"
+import { LoadingBrick } from "./loading-brick"
 import { DEFAULT_TIMER_DURATION, GRID_SIZE, MAX_GRID_SIZE, updateGridSize } from "../../lib/constants"
 import { sendMessage, onMessage, MessageType, type User } from "../../lib/real-time"
 import type { Brick } from "./events"
@@ -275,9 +276,25 @@ export default function V0Blocks() {
       onContextMenu={(e) => e.preventDefault()} // Prevent context menu on right-click
     >
       {loading ? (
-        <div className="flex items-center justify-center h-full w-full">
-          <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-white"></div>
-          <span className="text-white text-lg ml-4">Loading...</span>
+        <div className="flex flex-col items-center justify-center h-full w-full">
+          <div className="w-48 h-48 mb-6">
+            <Canvas shadows camera={{ position: [3, 3, 3], fov: 40 }}>
+              <ambientLight intensity={0.5} />
+              <directionalLight 
+                position={[5, 5, 5]} 
+                intensity={0.8} 
+                castShadow 
+                shadow-mapSize-width={1024} 
+                shadow-mapSize-height={1024}
+              />
+              <LoadingBrick />
+              <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -1, 0]} receiveShadow>
+                <planeGeometry args={[10, 10]} />
+                <shadowMaterial transparent opacity={0.2} />
+              </mesh>
+            </Canvas>
+          </div>
+          <span className="text-white text-xl font-medium">Loading your bricks...</span>
         </div>
       ) : (
         <>
