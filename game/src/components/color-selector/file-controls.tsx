@@ -7,7 +7,6 @@ import { MaybeTooltip } from "./maybe-tooltip"
 interface FileControlsProps {
   onPlayToggle: () => void
   isPlaying: boolean
-  onClearSet: () => void
   isMobile: boolean
   hasBricks: boolean
 }
@@ -15,7 +14,6 @@ interface FileControlsProps {
 export const FileControls: React.FC<FileControlsProps> = ({
   onPlayToggle,
   isPlaying,
-  onClearSet,
   isMobile,
   hasBricks,
 }) => {
@@ -28,16 +26,6 @@ export const FileControls: React.FC<FileControlsProps> = ({
           aria-label={isPlaying ? "Stop" : "Play"}
         >
           <Play className="w-5 h-5 stroke-[1.5]" />
-        </button>
-      </MaybeTooltip>
-      <MaybeTooltip text="Clear (⌘+Delete)" isMobile={isMobile}>
-        <button
-          onClick={onClearSet}
-          className={`${hasBricks ? "text-red-400 hover:text-red-300" : "text-gray-500 cursor-not-allowed"} transition-colors`}
-          aria-label="Clear Set"
-          disabled={!hasBricks}
-        >
-          <Trash2 className="w-5 h-5 stroke-[1.5]" />
         </button>
       </MaybeTooltip>
     </div>

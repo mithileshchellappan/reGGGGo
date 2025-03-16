@@ -3,7 +3,6 @@
 import type React from "react"
 import { useState, useEffect } from "react"
 import type { ColorSelectorProps } from "./types"
-import { HistoryControls } from "./history-controls"
 import { ColorPicker } from "./color-picker"
 import { DimensionControls } from "./dimension-controls"
 import { FileControls } from "./file-controls"
@@ -13,19 +12,12 @@ export const ColorSelector: React.FC<ColorSelectorProps> = ({
   colors,
   selectedColor,
   onSelectColor,
-  onUndo,
-  onRedo,
-  canUndo,
-  canRedo,
   width,
   depth,
   onWidthChange,
   onDepthChange,
-  onClearSet,
   onPlayToggle,
   isPlaying,
-  onSave,
-  onLoad,
   currentTheme,
   onThemeChange,
   bricksCount,
@@ -48,11 +40,6 @@ export const ColorSelector: React.FC<ColorSelectorProps> = ({
       {/* Main Controls Panel - Very rounded with smaller padding */}
       <div className="bg-gradient-to-b from-gray-800 to-gray-900 backdrop-blur-md px-6 py-3 rounded-[28px] shadow-lg border border-gray-700 text-white">
         <div className="flex items-center gap-3">
-          {/* History Controls */}
-          <HistoryControls onUndo={onUndo} onRedo={onRedo} canUndo={canUndo} canRedo={canRedo} isMobile={isMobile} />
-
-          <div className="w-px h-6 bg-gray-600" />
-
           {/* Color Selector */}
           <ColorPicker
             colors={colors}
@@ -81,7 +68,6 @@ export const ColorSelector: React.FC<ColorSelectorProps> = ({
             <FileControls
               onPlayToggle={onPlayToggle}
               isPlaying={isPlaying}
-              onClearSet={onClearSet}
               isMobile={isMobile}
               hasBricks={bricksCount > 0}
             />
@@ -92,7 +78,6 @@ export const ColorSelector: React.FC<ColorSelectorProps> = ({
             <MobileMenu
               onPlayToggle={onPlayToggle}
               isPlaying={isPlaying}
-              onClearSet={onClearSet}
               hasBricks={bricksCount > 0}
             />
           )}

@@ -2,7 +2,7 @@
 
 import type React from "react"
 import { ArrowLeftRight, ChevronDown } from "lucide-react"
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "../ui/dropdown-menu"
 import { SimpleTooltip } from "../simple-tooltip"
 
 interface DimensionControlsProps {
@@ -21,7 +21,7 @@ export const DimensionControls: React.FC<DimensionControlsProps> = ({
   isMobile,
 }) => {
   // Create an array of options for the dropdowns (1-20)
-  const dimensionOptions = Array.from({ length: 20 }, (_, i) => i + 1)
+  const dimensionOptions = Array.from({ length: 2 }, (_, i) => i + 1)
 
   // Function to swap width and height
   const handleSwapDimensions = () => {

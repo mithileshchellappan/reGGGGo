@@ -20,8 +20,6 @@ export const Scene: React.FC<SceneProps> = ({
   depth,
   onAddBrick,
   onDeleteBrick,
-  onUndo,
-  onRedo,
   isPlaying,
   interactionMode = "build",
   isInCooldown = false,
@@ -73,8 +71,9 @@ export const Scene: React.FC<SceneProps> = ({
           position={brick.position}
           width={brick.width}
           height={brick.height}
+          username={brick.username}
           isPlacing={hoveredBrickIndex === index && (interactionMode === "erase" || interactionMode === "move")}
-          onClick={() => handleBrickClick(index)}
+          onClick={() => handleBrickClick(brick,index)}
         />
       ))}
 

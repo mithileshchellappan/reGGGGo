@@ -65,7 +65,8 @@ Devvit.addCustomPostType({
 
       // Handle messages sent from the web view
       async onMessage(message, webView) {
-        console.log("Message from web view:", message)
+        console.log("current user in web view:", username)
+        console.log("Message from web view:", message.type)
         switch (message.type) {
           case 'webViewReady':
             console.log("WebView ready")
@@ -102,6 +103,7 @@ Devvit.addCustomPostType({
                 data: {
                   brick: message.data.brick,
                   index: message.data.index,
+                  brickId: message.data.brick.id,
                 }
               })
               break;
@@ -118,23 +120,34 @@ Devvit.addCustomPostType({
       const channel = useChannel({
         name: `creation_${context.postId.toString()}_updates`,
         onMessage: (message: any) => {
-          console.log("Message from channel:", message)
+          console.log("current user in channel:", username)
+          console.log("Message from channel:", message.type)
           if(!message || !webView) return;
-          if(message.username === username) return;
+          
+          if(message.username === username) {
+            console.log("Ignoring message from self");
+            return;
+          }
+          
           if(message.type === 'brickAdded') {
             console.log("Sending brickAdded message to web view")
             webView.postMessage({
               type: 'channelBrickAdded',
               data: {
                 brick: message.data.brick,
+                fromChannel: true // Add flag to indicate this came from channel
               }
             })
           }
+          
           if(message.type === 'brickDeleted') {
             console.log("Sending brickDeleted message to web view")
             webView.postMessage({
               type: 'channelBrickDeleted',
-              data: message.data,
+              data: {
+                ...message.data,
+                fromChannel: true // Add flag to indicate this came from channel
+              }
             })
           }
         }

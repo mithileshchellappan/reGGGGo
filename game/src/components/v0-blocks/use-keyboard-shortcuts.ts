@@ -23,12 +23,7 @@ interface KeyboardShortcutsProps {
   setDepth: (depth: number | ((prev: number) => number)) => void
   setSelectedColor: (color: string) => void
   setInteractionMode: (mode: "build" | "move" | "erase") => void
-  onUndo: () => void
-  onRedo: () => void
   onPlayToggle: () => void
-  handleClearWithConfirmation: () => void
-  handleSave: () => void
-  handleLoad: () => void
   currentTheme: string
   handleThemeChange: (theme: string) => void
 }
@@ -42,12 +37,7 @@ export function useKeyboardShortcuts({
   setDepth,
   setSelectedColor,
   setInteractionMode,
-  onUndo,
-  onRedo,
   onPlayToggle,
-  handleClearWithConfirmation,
-  handleSave,
-  handleLoad,
   currentTheme,
   handleThemeChange,
 }: KeyboardShortcutsProps) {
@@ -116,53 +106,11 @@ export function useKeyboardShortcuts({
         }
       }
 
-      // Undo: CMD+Z (Mac) or CTRL+Z (Windows)
-      if ((event.metaKey || event.ctrlKey) && !event.shiftKey && event.key.toLowerCase() === "z") {
-        event.preventDefault()
-        console.log("CMD+Z pressed")
-        onUndo()
-      }
-
-      // Redo: CMD+SHIFT+Z (Mac) or CTRL+SHIFT+Z (Windows)
-      if ((event.metaKey || event.ctrlKey) && event.shiftKey && event.key.toLowerCase() === "z") {
-        event.preventDefault()
-        console.log("CMD+SHIFT+Z pressed")
-        onRedo()
-      }
-
-      // Keep CMD+Y as an alternative for redo for backward compatibility
-      if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "y") {
-        event.preventDefault()
-        console.log("CMD+Y pressed")
-        onRedo()
-      }
-
       // Play: CMD+Enter
       if ((event.metaKey || event.ctrlKey) && event.key === "Enter") {
         event.preventDefault()
         console.log("CMD+Enter pressed")
         onPlayToggle()
-      }
-
-      // Clear: CMD+Delete or CMD+Backspace
-      if ((event.metaKey || event.ctrlKey) && (event.key === "Delete" || event.key === "Backspace")) {
-        event.preventDefault()
-        console.log("CMD+Delete pressed")
-        handleClearWithConfirmation()
-      }
-
-      // Save: CMD+S
-      if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "s") {
-        event.preventDefault()
-        console.log("CMD+S pressed")
-        handleSave()
-      }
-
-      // Load: CMD+O
-      if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "o") {
-        event.preventDefault()
-        console.log("CMD+O pressed")
-        handleLoad()
       }
     }
 
@@ -177,12 +125,7 @@ export function useKeyboardShortcuts({
     setDepth,
     setSelectedColor,
     setInteractionMode,
-    onUndo,
-    onRedo,
     onPlayToggle,
-    handleClearWithConfirmation,
-    handleSave,
-    handleLoad,
     currentTheme,
     handleThemeChange,
   ])

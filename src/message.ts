@@ -10,10 +10,10 @@ export type WebViewMessage =
   | { type: 'brickAdded'; data: { brick: Brick } }
   | { type: 'brickDeleted'; data: { brick: Brick; index: number } }
 
-  export type DevvitMessage =
+export type DevvitMessage =
   | { type: 'initialData'; data: { username: string; creation: { bricks: Brick[]; creationId: string } } } 
-  | { type: 'channelBrickAdded'; data: { brick: Brick } }
-  | { type: 'channelBrickDeleted'; data: { index: number } }
+  | { type: 'channelBrickAdded'; data: { brick: Brick; fromChannel: boolean } }
+  | { type: 'channelBrickDeleted'; data: { index: number; brick: Brick; brickId: string; fromChannel: boolean } }
 
 /**
  * Web view MessageEvent listener data type. The Devvit API wraps all messages

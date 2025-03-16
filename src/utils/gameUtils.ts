@@ -4,6 +4,7 @@ import type { Brick } from '../../game/src/components/v0-blocks/events';
 
 
 export const updateCreation = async (context: Context, bricks: Brick) => {
+  console.log("Updating creation", bricks)
 const {postId, kvStore: kv} =  context
   const creation = await kv.get(`creation:${postId}`)
   if (!creation) {
@@ -12,6 +13,7 @@ const {postId, kvStore: kv} =  context
     }
     await kv.put(`creation:${postId}`, JSON.stringify(creation))
     console.log("Creation created", creation)
+    return
   }
   const creationData = JSON.parse(creation as unknown as string)
   creationData.bricks.push(bricks)

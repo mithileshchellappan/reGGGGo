@@ -2,19 +2,12 @@ export interface ColorSelectorProps {
   colors: string[]
   selectedColor: string
   onSelectColor: (color: string) => void
-  onUndo: () => void
-  onRedo: () => void
-  canUndo: boolean
-  canRedo: boolean
   width: number
   depth: number
   onWidthChange: (width: number) => void
   onDepthChange: (depth: number) => void
-  onClearSet: () => void
   onPlayToggle: () => void
   isPlaying: boolean
-  onSave: () => void
-  onLoad: () => void
   currentCreationId?: string
   currentCreationName?: string
   currentTheme: ColorTheme

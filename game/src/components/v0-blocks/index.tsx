@@ -43,7 +43,7 @@ export default function V0Blocks() {
   const [depth, setDepth] = useState(2)
   const [isPlaying, setIsPlaying] = useState(false)
   const [interactionMode, setInteractionMode] = useState<"build" | "move" | "erase">("build")
-  const orbitControlsRef = useRef()
+  const orbitControlsRef = useRef<OrbitControls>(null)
 
   // Modal state
   const [showClearModal, setShowClearModal] = useState(false)
@@ -72,33 +72,115 @@ export default function V0Blocks() {
 
       switch (message.type) {
         case MessageType.INITIAL_DATA:
-          setBricks(message.data.creation.bricks)
-          setUsername(message.data.username)
-          break
-        case MessageType.CHANNEL_BRICK_ADDED:
-          // Add brick from another user
-          const newBrick = message.data.brick as Brick
-          setBricks((prev) => [...prev, newBrick])
-
-          // Update brick user mapping
-          if (message.userId) {
-            setBrickUsers((prev) => [...prev, { brickIndex: bricks.length, username: message.username }])
+          console.log("🔄 INITIAL_DATA received:", message.data.creation.bricks.length, "bricks");
+          
+          // Set initial bricks
+          const initialBricks = message.data.creation.bricks;
+          setBricks(initialBricks);
+          console.log("Initial bricks:", initialBricks)
+          // Set username
+          setUsername(message.data.username);
+          
+          // Set up initial brick-user mappings for existing bricks
+          // This ensures we know which user owns which brick
+          if (initialBricks && initialBricks.length > 0) {
+            const initialBrickUsers = initialBricks.map((brick: Brick, index: number) => ({
+              brickIndex: index,
+              username: brick.username || '', // Use brick's username if available, otherwise the current user
+              brickId: brick.id // Store the brick ID for more robust identification
+            }));
+            setBrickUsers(initialBrickUsers);
+            console.log("🧱 Initial brick-user mappings created:", initialBrickUsers.length);
           }
-          break
+          break;
+
+        case MessageType.CHANNEL_BRICK_ADDED:
+          // Use functional updates to get the latest state
+          setBricks(currentBricks => {
+            console.log("➕ CHANNEL_BRICK_ADDED received, current bricks:", currentBricks.length);
+            
+            // Add brick from another user
+            const newBrick = message.data.brick as Brick;
+            console.log("Adding new brick with ID:", newBrick.id);
+            
+            // Check if we already have this brick
+            if (currentBricks.some(b => b.id === newBrick.id)) {
+              console.log("🚫 Brick already exists, skipping:", newBrick.id);
+              return currentBricks; // Return unchanged state
+            }
+            
+            // Create a new array with the added brick
+            const updatedBricks = [...currentBricks, newBrick];
+            console.log("✅ Brick added, new total:", updatedBricks.length);
+            
+            // Update history and historyIndex in separate state setters
+            setHistory(currentHistory => {
+              const currentIndex = historyIndex;
+              const newHistory = [...currentHistory.slice(0, currentIndex + 1), updatedBricks];
+              setHistoryIndex(currentIndex + 1);
+              return newHistory;
+            });
+            
+            return updatedBricks;
+          });
+          
+          // Update brick user mapping if we have user info
+          if (message.data.username) {
+            // setBrickUsers((prev) => {
+            //   // Calculate the new length after the brick was added
+            //   const newBrickIndex = bricks.length; // This is now the index of the newly added brick
+              
+            //   return [
+            //     ...prev, 
+            //     { 
+            //       brickIndex: newBrickIndex, 
+            //       username: message.data.username,
+            //       brickId: newBrick.id // Store the brick ID for more robust identification
+            //     }
+            //   ];
+            // });
+          }
+          break;
 
         case MessageType.CHANNEL_BRICK_DELETED:
-          // Delete brick from another user
-          const index = message.data.index as number
-          setBricks((prev) => prev.filter((_, i) => i !== index))
+          setBricks(currentBricks => {
+            console.log("🗑️ CHANNEL_BRICK_DELETED received for brick ID:", message.data.brickId);
+            
+            // Find the index of the brick with matching ID
+            const brickId = message.data.brickId;
+            
+            // Deep log the brick array to debug
+            console.log("Current bricks before deletion:", 
+              currentBricks.map(b => ({ id: b.id, pos: b.position }))
+            );
+            
+            const brickIndex = currentBricks.findIndex(brick => brick.id === brickId);
+            
+            if (brickIndex === -1) {
+              console.log(`Brick with ID ${brickId} not found, cannot delete`);
+              return currentBricks; // Return unchanged state
+            }
+            
+            console.log(`Found brick at index ${brickIndex}, deleting...`);
+            
+            // Create new arrays without the brick
+            const updatedBricks = [
+              ...currentBricks.slice(0, brickIndex),
+              ...currentBricks.slice(brickIndex + 1)
+            ];
+            
+            // Update history separately 
+            setHistory(currentHistory => {
+              const currentIndex = historyIndex;
+              const newHistory = [...currentHistory.slice(0, currentIndex + 1), updatedBricks];
+              setHistoryIndex(currentIndex + 1);
+              return newHistory;
+            });
+            
+            return updatedBricks;
+          });
           
-          // Update brick user mapping
-          setBrickUsers((prev) =>
-            prev
-              .filter((bu) => bu.brickIndex !== index)
-              // Adjust indices for bricks after the deleted one
-              .map((bu) => (bu.brickIndex > index ? { ...bu, brickIndex: bu.brickIndex - 1 } : bu)),
-          )
-          break
+          break;
 
         case MessageType.TIMER_UPDATE:
           // Update timer
@@ -125,43 +207,56 @@ export default function V0Blocks() {
           break
       }
     })
-  }, [bricks.length])
+    
+    // Return cleanup function to remove event listener
+    return () => {
+      // Clean up code here if needed
+    };
+  }, []) // Empty dependency array since we're using functional updates
 
   // Wrapper functions that call the imported event handlers with the current state
   const onAddBrick = useCallback(
     (brick: Brick) => {
       if (isInCooldown) return // Don't add brick if in cooldown
-
+      brick.username = username
       handleAddBrick(brick, bricks, setBricks, history, historyIndex, setHistory, setHistoryIndex)
       startCooldown() // Start cooldown after adding a brick
     },
     [bricks, history, historyIndex, isInCooldown, startCooldown],
   )
 
-  // const onDeleteBrick = useCallback(
-  //   (index: number) => {
-  //     handleDeleteBrick(index, bricks, setBricks, history, historyIndex, setHistory, setHistoryIndex)
-
-  //     // Send message for real-time updates
-  //     sendMessage({
-  //       type: MessageType.BRICK_DELETED,
-  //       data: {
-  //         index,
-  //         brick: bricks[index],
-  //       },
-  //     })
-  //   },
-  //   [bricks, history, historyIndex],
-  // )
-
   const onDeleteBrick = useCallback(
-    (index: number) => {
+    (brick: Brick, index: number) => {
       if (isInCooldown) return
 
-      handleDeleteBrick(index, bricks, setBricks, history, historyIndex, setHistory, setHistoryIndex)
-      startCooldown() 
+      console.log(`onDeleteBrick called for index ${index}, current bricks:`, bricks.length);
+      
+      // Verify the brick exists
+      const brickToDelete = brick;
+      if (!brickToDelete) {
+        console.error(`No brick found at index ${index}, can't delete`);
+        return;
+      }
+      
+      console.log(`Deleting brick with ID ${brickToDelete.id}`);
+      
+      // Call the handler with isFromChannel=false so it will emit the event
+      handleDeleteBrick(
+        brickToDelete,
+        index,
+        bricks, 
+        setBricks,
+        history,
+        historyIndex,
+        setHistory,
+        setHistoryIndex,
+        false
+      );
+      
+      // Start cooldown after deleting
+      startCooldown();
     },
-    [bricks, history, historyIndex, isInCooldown, startCooldown],
+    [bricks, history, historyIndex, isInCooldown, startCooldown, setHistory, setHistoryIndex],
   )
 
   const onUpdateBrick = useCallback(
@@ -171,28 +266,12 @@ export default function V0Blocks() {
     [bricks, history, historyIndex],
   )
 
-  const onUndo = useCallback(() => {
-    console.log("Undo triggered")
-    handleUndo(historyIndex, setHistoryIndex, history, setBricks)
-  }, [history, historyIndex])
-
-  const onRedo = useCallback(() => {
-    console.log("Redo triggered")
-    handleRedo(historyIndex, setHistoryIndex, history, setBricks)
-  }, [history, historyIndex])
-
   const onClearSet = useCallback(() => {
     console.log("Clear set triggered")
     handleClearSet(setBricks, setHistory, setHistoryIndex)
     // Close the modal
     setShowClearModal(false)
   }, [])
-
-  const handleClearWithConfirmation = useCallback(() => {
-    if (bricks.length > 0) {
-      setShowClearModal(true)
-    }
-  }, [bricks.length])
 
   const onPlayToggle = useCallback(() => {
     console.log("Play toggle triggered")
@@ -234,14 +313,9 @@ export default function V0Blocks() {
     setDepth,
     setSelectedColor,
     setInteractionMode,
-    onUndo,
-    onRedo,
     onPlayToggle,
-    handleClearWithConfirmation,
-    handleSave: () => {}, // Empty function since we removed save functionality
-    handleLoad: () => {}, // Empty function since we removed load functionality
     currentTheme,
-    handleThemeChange,
+    handleThemeChange: handleThemeChange as (theme: string) => void,
   })
 
   return (
@@ -257,8 +331,6 @@ export default function V0Blocks() {
           depth={depth}
           onAddBrick={onAddBrick}
           onDeleteBrick={onDeleteBrick}
-          onUndo={onUndo}
-          onRedo={onRedo}
           isPlaying={isPlaying}
           interactionMode={interactionMode}
           isInCooldown={isInCooldown}
@@ -298,19 +370,12 @@ export default function V0Blocks() {
             colors={currentColors}
             selectedColor={selectedColor}
             onSelectColor={handleSelectColor}
-            onUndo={onUndo}
-            onRedo={onRedo}
-            canUndo={historyIndex > 0}
-            canRedo={historyIndex < history.length - 1}
             width={width}
             depth={depth}
             onWidthChange={setWidth}
             onDepthChange={setDepth}
-            onClearSet={handleClearWithConfirmation}
             onPlayToggle={onPlayToggle}
             isPlaying={isPlaying}
-            onSave={() => {}} // Empty function since we removed save functionality
-            onLoad={() => {}} // Empty function since we removed load functionality
             currentTheme={currentTheme}
             onThemeChange={handleThemeChange}
             bricksCount={bricks.length}

@@ -15,7 +15,7 @@ interface UseSceneInteractionProps {
   depth: number
   selectedColor: string
   onAddBrick: (brick: Brick) => void
-  onDeleteBrick?: (index: number) => void
+  onDeleteBrick?: (brick: Brick, index: number) => void
   isPlaying: boolean
   interactionMode: "build" | "move" | "erase"
   isInCooldown?: boolean
@@ -50,8 +50,10 @@ export function useSceneInteraction({
   const [touchedBrickIndex, setTouchedBrickIndex] = useState<number | null>(null)
   const [isDeleting, setIsDeleting] = useState(false)
   const [isMobile, setIsMobile] = useState(false)
+  const [isAddingBrick, setIsAddingBrick] = useState(false)
 
-  // Generate a consistent ID for the preview and actual brick
+  // Generate a consistent ID for the preview brick display only
+  // Note: When actually placing a brick, we'll generate a new unique ID
   const previewBrickId = useMemo(() => uuidv4(), []);
 
   // Touch interaction tracking
@@ -194,7 +196,14 @@ export function useSceneInteraction({
   const findUserForBrick = (brickIndex: number): User | null => {
     if (!brickUsers || !users) return null
 
-    const brickUser = brickUsers.find((bu) => bu.brickIndex === brickIndex)
+    const brick = bricks[brickIndex];
+    if (!brick) return null;
+    
+    // First try to find by brickId (more reliable)
+    const brickUser = brickUsers.find((bu) => 
+      (bu.brickId && brick.id && bu.brickId === brick.id) || bu.brickIndex === brickIndex
+    );
+    
     if (!brickUser) return null
 
     const user = users.find((u) => u.id === brickUser.username)
@@ -271,7 +280,7 @@ export function useSceneInteraction({
     // Prevent default behavior to avoid unintended actions
     event.stopPropagation()
 
-    if (isPlaying) return
+    if (isPlaying || isAddingBrick) return
 
     if (interactionMode === "build" && isPlacing && isValid && showNewBrick) {
       if (isInCooldown) {
@@ -280,7 +289,22 @@ export function useSceneInteraction({
         return
       }
 
-      onAddBrick({ id: previewBrickId, color: selectedColor, position: currentBrickPosition, width, height: depth })
+      // Set flag to prevent duplicate placement
+      setIsAddingBrick(true)
+
+      // Generate a new UUID for the actual brick placement
+      const newBrickId = `${currentBrickPosition[0]}-${currentBrickPosition[1]}-${currentBrickPosition[2]}`
+      if(bricks.some((brick) => brick.id === newBrickId)) {
+        setIsAddingBrick(false)
+        return
+      }
+      console.log("Placing brick with new ID:", newBrickId);
+      onAddBrick({ id: newBrickId, color: selectedColor, position: currentBrickPosition, width, height: depth })
+      
+      // Reset the flag after a short delay
+      setTimeout(() => {
+        setIsAddingBrick(false)
+      }, 100)
     }
   }
 
@@ -342,20 +366,37 @@ export function useSceneInteraction({
 
     if (interactionMode === "build") {
       // If didn't move (or moved very little), consider it a tap to place a brick
-      if (touchStartPosition && !hasMoved && isValid && showNewBrick) {
+      if (touchStartPosition && !hasMoved && isValid && showNewBrick && !isAddingBrick) {
         if (isInCooldown) {
           // Don't add brick if in cooldown
           console.log("In cooldown, can't add brick yet")
           return
         }
 
-        onAddBrick({ id: previewBrickId, color: selectedColor, position: currentBrickPosition, width, height: depth })
+        // Set flag to prevent duplicate placement
+        setIsAddingBrick(true)
+
+        // Generate a new UUID for the actual brick placement on mobile
+        const newBrickId = `${currentBrickPosition[0]}-${currentBrickPosition[1]}-${currentBrickPosition[2]}`
+        if(bricks.some((brick) => brick.id === newBrickId)) {
+          setIsAddingBrick(false)
+          return
+        }
+        console.log("Placing brick with new ID (mobile):", newBrickId, bricks);
+        
+        onAddBrick({ id: newBrickId, color: selectedColor, position: currentBrickPosition, width, height: depth })
+        
+        // Reset the flag after a short delay
+        setTimeout(() => {
+          setIsAddingBrick(false)
+        }, 100)
       }
     } else if (interactionMode === "erase" && touchedBrickIndex !== null) {
       // For erase mode, delete the brick on touch end if we didn't move much
       if (!hasMoved && onDeleteBrick) {
+        console.log(`use-scene-interaction line 373 Deleting brick at index: ${touchedBrickIndex}, brick: ${bricks[touchedBrickIndex]}`);
         setIsDeleting(true)
-        onDeleteBrick(touchedBrickIndex)
+        onDeleteBrick(bricks[touchedBrickIndex], touchedBrickIndex)
       }
     }
 
@@ -365,16 +406,18 @@ export function useSceneInteraction({
     setTouchedBrickIndex(null)
   }
 
-  const handleBrickClick = (index: number) => {
+  const handleBrickClick = (brick: Brick, index: number) => {
     if (isPlaying || isDeleting) return
 
     if (interactionMode === "erase" && onDeleteBrick) {
+      console.log(`🖱️ Brick clicked for deletion at index: ${index}`);
+      
       // Set deleting flag to prevent hover effects during deletion
       setIsDeleting(true)
       // Clear the hovered brick index immediately
       setHoveredBrickIndex(null)
       // Delete the brick
-      onDeleteBrick(index)
+      onDeleteBrick(brick, index)
     }
   }
 

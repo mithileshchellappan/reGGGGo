@@ -2,16 +2,15 @@
 
 import type React from "react"
 import { Play, Trash2, Menu } from "lucide-react"
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover"
 
 interface MobileMenuProps {
   onPlayToggle: () => void
   isPlaying: boolean
-  onClearSet: () => void
   hasBricks: boolean
 }
 
-export const MobileMenu: React.FC<MobileMenuProps> = ({ onPlayToggle, isPlaying, onClearSet, hasBricks }) => {
+export const MobileMenu: React.FC<MobileMenuProps> = ({ onPlayToggle, isPlaying, hasBricks }) => {
   return (
     <div className="flex items-center">
       <Popover>
@@ -28,19 +27,6 @@ export const MobileMenu: React.FC<MobileMenuProps> = ({ onPlayToggle, isPlaying,
             >
               <Play className="w-4 h-4 stroke-[1.5]" />
               <span>{isPlaying ? "Stop" : "Play"}</span>
-            </button>
-
-            <div className="my-1 border-t border-gray-200"></div>
-
-            <button
-              onClick={onClearSet}
-              className={`w-full flex items-center gap-2 px-4 py-2 text-left ${
-                hasBricks ? "text-red-600 hover:bg-red-50" : "text-gray-400 cursor-not-allowed"
-              }`}
-              disabled={!hasBricks}
-            >
-              <Trash2 className={`w-4 h-4 stroke-[1.5] ${hasBricks ? "text-red-600" : "text-gray-400"}`} />
-              <span>Clear</span>
             </button>
           </div>
         </PopoverContent>

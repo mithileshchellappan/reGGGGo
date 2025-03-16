@@ -1,7 +1,7 @@
 import V0Blocks from "./components/v0-blocks"
 import { ThemeProvider } from "./components/theme-provider"
 import { useEffect } from "react"
-import { onMessage, sendMessage } from "./lib/message-devvit"
+import { onMessage, sendMessage } from "./lib/real-time"
 
 function App() {
   useEffect(() => {

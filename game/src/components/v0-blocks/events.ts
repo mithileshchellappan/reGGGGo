@@ -25,12 +25,25 @@ export const emitBrickAdded = (brick: Brick) => {
   })
 }
 
-export const emitBrickDeleted = (index: number, bricks: Brick[]) => {
+export const emitBrickDeleted = (index: number, brick: Brick) => {
+  if (!brick) {
+    console.error(`Cannot emit brick delete: no brick at index ${index}`);
+    return;
+  }
+  
+  if (!brick.id) {
+    console.error(`Cannot emit brick delete: brick at index ${index} has no ID`);
+    return;
+  }
+  
+  console.log(`Emitting CHANNEL_BRICK_DELETED for brick ID: ${brick.id}`);
+  
   sendMessage({
     type: MessageType.BRICK_DELETED,
     data: {
       index,
-      brick: bricks[index],
+      brick,
+      brickId: brick.id, // Add the brick ID for more robust identification
     },
   })
 }
@@ -44,23 +57,31 @@ export const handleAddBrick = (
   historyIndex: number,
   setHistory: Dispatch<SetStateAction<BrickHistory>>,
   setHistoryIndex: Dispatch<SetStateAction<number>>,
+  isFromChannel = false, // Add flag to indicate if this action came from channel
 ) => {
-  const newBricks = [...bricks, brick]
-  const uniqueBricks = newBricks.filter((brick, index, self) =>
-    index === self.findIndex((t) => t.id === brick.id)
-  )
-  setBricks(uniqueBricks)
-  const newHistory = history.slice(0, historyIndex + 1)
-  newHistory.push(uniqueBricks)
-  setHistory(newHistory)
-  setHistoryIndex(historyIndex + 1)
+  // Check if the brick with this ID already exists
+  if (bricks.some(existingBrick => existingBrick.id === brick.id)) {
+    console.log(`Brick with ID ${brick.id} already exists, skipping add`);
+    return; // Skip adding duplicate brick
+  }
+  console.log(bricks,brick)
+  const newBricks = [...bricks, brick];
+  setBricks(newBricks);
+  
+  const newHistory = history.slice(0, historyIndex + 1);
+  newHistory.push(newBricks);
+  setHistory(newHistory);
+  setHistoryIndex(historyIndex + 1);
 
-  // Emit the brick added event
-  emitBrickAdded(brick)
+  // Only emit the event if it's a local action, not from channel
+  if (!isFromChannel) {
+    emitBrickAdded(brick);
+  }
 }
 
 // Modify the handleDeleteBrick function to emit an event
 export const handleDeleteBrick = (
+  brick: Brick,
   index: number,
   bricks: Brick[],
   setBricks: Dispatch<SetStateAction<Brick[]>>,
@@ -68,19 +89,33 @@ export const handleDeleteBrick = (
   historyIndex: number,
   setHistory: Dispatch<SetStateAction<BrickHistory>>,
   setHistoryIndex: Dispatch<SetStateAction<number>>,
+  isFromChannel = false, // Add flag to indicate if this action came from channel
 ) => {
-  const newBricks = bricks.filter((brick) => brick.id !== bricks[index].id)
-  const uniqueBricks = newBricks.filter((brick, index, self) =>
-    index === self.findIndex((t) => t.id === brick.id)
-  )
-  setBricks(uniqueBricks)
-  const newHistory = history.slice(0, historyIndex + 1)
-  newHistory.push(uniqueBricks)
-  setHistory(newHistory)
-  setHistoryIndex(historyIndex + 1)
+  const brickToDelete = brick;
+  console.log(`🗑️ Brick to delete: ${brickToDelete}`, bricks);
+  if (!brickToDelete) {
+    console.log(`No brick found at index ${index}, skipping delete`);
+    return;
+  }
+  
+  console.log(`🗑️ Deleting brick with ID ${brickToDelete.id} at index ${index}, is from channel: ${isFromChannel}`);
+  console.log(`Current bricks count: ${bricks.length}`);
+  
+  // Simply filter out the brick with the matching ID
+  const newBricks = bricks.filter(brick => brick.id !== brickToDelete.id);
+  console.log(`After filtering, bricks count: ${newBricks.length}`);
+  
+  setBricks(newBricks);
+  const newHistory = history.slice(0, historyIndex + 1);
+  newHistory.push(newBricks);
+  setHistory(newHistory);
+  setHistoryIndex(historyIndex + 1);
 
-  // Emit the brick deleted event
-  emitBrickDeleted(index, bricks)
+  // Only emit the event if it's a local action, not from channel
+  if (!isFromChannel) {
+    console.log(`Emitting brick deleted event for ID ${brickToDelete.id}`);
+    emitBrickDeleted(index, brickToDelete);
+  }
 }
 
 export const handleUpdateBrick = (
