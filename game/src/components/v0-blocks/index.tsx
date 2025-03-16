@@ -34,6 +34,9 @@ export default function V0Blocks() {
   const { currentTheme, currentColors, selectedColor, setSelectedColor, handleSelectColor, handleThemeChange } =
     useColorTheme()
 
+  // Loading state
+  const [loading, setLoading] = useState(true)
+
   // State
   const [bricks, setBricks] = useState<Brick[]>([])
   const [username, setUsername] = useState<string>("")
@@ -43,7 +46,7 @@ export default function V0Blocks() {
   const [depth, setDepth] = useState(2)
   const [isPlaying, setIsPlaying] = useState(false)
   const [interactionMode, setInteractionMode] = useState<"build" | "move" | "erase">("build")
-  const orbitControlsRef = useRef<OrbitControls>(null)
+  const orbitControlsRef = useRef<any>(null)
 
   // Modal state
   const [showClearModal, setShowClearModal] = useState(false)
@@ -92,6 +95,9 @@ export default function V0Blocks() {
             setBrickUsers(initialBrickUsers);
             console.log("🧱 Initial brick-user mappings created:", initialBrickUsers.length);
           }
+          
+          // Set loading to false
+          setLoading(false);
           break;
 
         case MessageType.CHANNEL_BRICK_ADDED:
@@ -323,93 +329,102 @@ export default function V0Blocks() {
       className="fixed inset-0 w-full h-full bg-purple-950 font-sans overflow-hidden"
       onContextMenu={(e) => e.preventDefault()} // Prevent context menu on right-click
     >
-      <Canvas shadows camera={{ position: [0, 15, 15], fov: 50 }}>
-        <Scene
-          bricks={bricks}
-          selectedColor={selectedColor}
-          width={width}
-          depth={depth}
-          onAddBrick={onAddBrick}
-          onDeleteBrick={onDeleteBrick}
-          isPlaying={isPlaying}
-          interactionMode={interactionMode}
-          isInCooldown={isInCooldown}
-          totalTime={totalTime}
-          brickUsers={brickUsers}
-          users={users}
-          onUserHover={handleUserHover}
-        />
-        <OrbitControls
-          ref={orbitControlsRef}
-          target={[0, 0, 0]}
-          minPolarAngle={0}
-          maxPolarAngle={Math.PI / 2}
-          minDistance={10} // Minimum zoom distance
-          maxDistance={40} // Maximum zoom distance
-          autoRotate={isPlaying}
-          autoRotateSpeed={1}
-          enableZoom={!isPlaying && interactionMode === "move"}
-          enablePan={!isPlaying && interactionMode === "move"}
-          enableRotate={!isPlaying && interactionMode === "move"}
-        />
-      </Canvas>
-
-      {/* Settings button */}
-      <button
-        onClick={() => setShowResizeModal(true)}
-        className="fixed top-4 left-20 z-50 bg-black/70 rounded-full p-2 text-white"
-        aria-label="Canvas Settings"
-      >
-        <Settings className="w-5 h-5" />
-      </button>
-
-      {!isPlaying && (
+      {loading ? (
+        <div className="flex items-center justify-center h-full w-full">
+          <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-white"></div>
+          <span className="text-white text-lg ml-4">Loading...</span>
+        </div>
+      ) : (
         <>
-          <ActionToolbar onModeChange={handleModeChange} currentMode={interactionMode} />
-          <ColorSelector
-            colors={currentColors}
-            selectedColor={selectedColor}
-            onSelectColor={handleSelectColor}
-            width={width}
-            depth={depth}
-            onWidthChange={setWidth}
-            onDepthChange={setDepth}
-            onPlayToggle={onPlayToggle}
-            isPlaying={isPlaying}
-            currentTheme={currentTheme}
-            onThemeChange={handleThemeChange}
-            bricksCount={bricks.length}
-          />
-          <AudioPlayer />
-          {isInCooldown && <CooldownIndicator remainingTime={cooldownRemaining} />}
+          <Canvas shadows camera={{ position: [0, 15, 15], fov: 50 }}>
+            <Scene
+              bricks={bricks}
+              selectedColor={selectedColor}
+              width={width}
+              depth={depth}
+              onAddBrick={onAddBrick}
+              onDeleteBrick={onDeleteBrick}
+              isPlaying={isPlaying}
+              interactionMode={interactionMode}
+              isInCooldown={isInCooldown}
+              totalTime={totalTime}
+              brickUsers={brickUsers}
+              users={users}
+              onUserHover={handleUserHover}
+            />
+            <OrbitControls
+              ref={orbitControlsRef}
+              target={[0, 0, 0]}
+              minPolarAngle={0}
+              maxPolarAngle={Math.PI / 2}
+              minDistance={10} // Minimum zoom distance
+              maxDistance={40} // Maximum zoom distance
+              autoRotate={isPlaying}
+              autoRotateSpeed={1}
+              enableZoom={!isPlaying && interactionMode === "move"}
+              enablePan={!isPlaying && interactionMode === "move"}
+              enableRotate={!isPlaying && interactionMode === "move"}
+            />
+          </Canvas>
 
-          {/* User hover card */}
-          <UserHoverCard
-            user={hoveredUser}
-            position={hoveredUserPosition}
-            visible={interactionMode === "move" && hoveredUser !== null}
+          {/* Settings button */}
+          <button
+            onClick={() => setShowResizeModal(true)}
+            className="fixed top-4 left-20 z-50 bg-black/70 rounded-full p-2 text-white"
+            aria-label="Canvas Settings"
+          >
+            <Settings className="w-5 h-5" />
+          </button>
+
+          {!isPlaying && (
+            <>
+              <ActionToolbar onModeChange={handleModeChange} currentMode={interactionMode} />
+              <ColorSelector
+                colors={currentColors}
+                selectedColor={selectedColor}
+                onSelectColor={handleSelectColor}
+                width={width}
+                depth={depth}
+                onWidthChange={setWidth}
+                onDepthChange={setDepth}
+                onPlayToggle={onPlayToggle}
+                isPlaying={isPlaying}
+                currentTheme={currentTheme}
+                onThemeChange={handleThemeChange}
+                bricksCount={bricks.length}
+              />
+              <AudioPlayer />
+              {isInCooldown && <CooldownIndicator remainingTime={cooldownRemaining} />}
+
+              {/* User hover card */}
+              <UserHoverCard
+                user={hoveredUser}
+                position={hoveredUserPosition}
+                visible={interactionMode === "move" && hoveredUser !== null}
+              />
+            </>
+          )}
+          {isPlaying && (
+            <button
+              onClick={onPlayToggle}
+              className="absolute bottom-8 left-1/2 transform -translate-x-1/2 text-white hover:text-gray-300 transition-colors"
+              aria-label="Stop"
+            >
+              <Pause className="w-8 h-8 stroke-[1.5]" />
+            </button>
+          )}
+
+          {/* Modals */}
+          <ClearConfirmationModal isOpen={showClearModal} onClose={() => setShowClearModal(false)} onClear={onClearSet} />
+          <CanvasResizeModal
+            isOpen={showResizeModal}
+            onClose={() => setShowResizeModal(false)}
+            onResize={handleCanvasResize}
+            currentSize={GRID_SIZE}
+            maxSize={MAX_GRID_SIZE}
           />
         </>
       )}
-      {isPlaying && (
-        <button
-          onClick={onPlayToggle}
-          className="absolute bottom-8 left-1/2 transform -translate-x-1/2 text-white hover:text-gray-300 transition-colors"
-          aria-label="Stop"
-        >
-          <Pause className="w-8 h-8 stroke-[1.5]" />
-        </button>
-      )}
-
-      {/* Modals */}
-      <ClearConfirmationModal isOpen={showClearModal} onClose={() => setShowClearModal(false)} onClear={onClearSet} />
-      <CanvasResizeModal
-        isOpen={showResizeModal}
-        onClose={() => setShowResizeModal(false)}
-        onResize={handleCanvasResize}
-        currentSize={GRID_SIZE}
-        maxSize={MAX_GRID_SIZE}
-      />
     </div>
   )
 }
