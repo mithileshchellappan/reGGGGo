@@ -266,7 +266,7 @@ export default function V0Blocks() {
               </mesh>
             </Canvas>
           </div>
-          <span className="text-white text-xl font-medium">Loading your bricks...</span>
+          <span className="text-white text-xl font-medium">Loading...</span>
         </div>
       ) : (
         <>

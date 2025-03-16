@@ -1,6 +1,6 @@
 import './createPost.js';
 
-import { Devvit, useChannel, useState, useWebView } from '@devvit/public-api';
+import { Devvit, useAsync, useChannel, useState, useWebView } from '@devvit/public-api';
 
 import type { DevvitMessage, WebViewMessage } from './message.js';
 import { deleteBrick, getCreation, updateCreation } from './utils/gameUtils.js';
@@ -17,13 +17,10 @@ Devvit.addMenuItem({
   location: 'subreddit',
   onPress: async (event, context) =>{
     const { reddit, ui } = context;
-
-    const opName = await reddit.getCurrentUsername() || 'anon';
-
     const subreddit = await reddit.getCurrentSubredditName();
 
     const post = await reddit.submitPost({
-      title: `Leggggo | ${opName}`,
+      title: `Reggggo Builder`,
       subredditName: subreddit,
       preview: <vstack>
         <text>Loading...</text>
@@ -34,8 +31,6 @@ Devvit.addMenuItem({
       ui.showToast('Failed to create challenge');
       return;
     }
-
-    // await storePostCreator(post.id, currentUsername, context);
 
     ui.showToast('Challenge created!');
     ui.navigateTo(post);
@@ -51,11 +46,7 @@ Devvit.addCustomPostType({
     const [username] = useState(async () => {
       return (await context.reddit.getCurrentUsername()) ?? 'anon';
     });
-    // Load latest counter from redis with `useAsync` hook
-    const [counter, setCounter] = useState(async () => {
-      const redisCount = await context.redis.get(`counter_${context.postId}`);
-      return Number(redisCount ?? 0);
-    });
+
 
    
 
@@ -171,11 +162,6 @@ Devvit.addCustomPostType({
               </text>
             </hstack>
             <hstack>
-              <text size="medium">Current counter:</text>
-              <text size="medium" weight="bold">
-                {' '}
-                {counter ?? ''}
-              </text>
             </hstack>
           </vstack>
           <spacer />
