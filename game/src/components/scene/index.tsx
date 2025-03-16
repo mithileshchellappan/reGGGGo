@@ -25,7 +25,6 @@ export const Scene: React.FC<SceneProps> = ({
   isInCooldown = false,
   timeRemaining = 0,
   totalTime = 0,
-  brickUsers = [],
   users = [],
   onUserHover,
 }) => {
@@ -51,7 +50,6 @@ export const Scene: React.FC<SceneProps> = ({
     isPlaying,
     interactionMode,
     isInCooldown,
-    brickUsers,
     users,
     onUserHover,
   })

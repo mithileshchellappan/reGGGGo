@@ -4,7 +4,6 @@ import { useState, useRef, useCallback, useEffect } from "react"
 import { Canvas } from "@react-three/fiber"
 import { OrbitControls } from "@react-three/drei"
 import { Pause, Settings } from "lucide-react"
-import { AudioPlayer } from "../audio-player"
 import { Scene } from "../scene"
 import { ColorSelector } from "../color-selector"
 import { ActionToolbar } from "../action-toolbar"
@@ -58,7 +57,6 @@ export default function V0Blocks() {
 
   // User state
   const [users, setUsers] = useState<User[]>([])
-  const [brickUsers, setBrickUsers] = useState<BrickWithUser[]>([])
   const [hoveredUser, setHoveredUser] = useState<User | null>(null)
   const [hoveredUserPosition, setHoveredUserPosition] = useState({ x: 0, y: 0 })
 
@@ -83,18 +81,6 @@ export default function V0Blocks() {
           console.log("Initial bricks:", initialBricks)
           // Set username
           setUsername(message.data.username);
-          
-          // Set up initial brick-user mappings for existing bricks
-          // This ensures we know which user owns which brick
-          if (initialBricks && initialBricks.length > 0) {
-            const initialBrickUsers = initialBricks.map((brick: Brick, index: number) => ({
-              brickIndex: index,
-              username: brick.username || '', // Use brick's username if available, otherwise the current user
-              brickId: brick.id // Store the brick ID for more robust identification
-            }));
-            setBrickUsers(initialBrickUsers);
-            console.log("🧱 Initial brick-user mappings created:", initialBrickUsers.length);
-          }
           
           // Set loading to false
           setLoading(false);
@@ -129,23 +115,6 @@ export default function V0Blocks() {
             
             return updatedBricks;
           });
-          
-          // Update brick user mapping if we have user info
-          if (message.data.username) {
-            // setBrickUsers((prev) => {
-            //   // Calculate the new length after the brick was added
-            //   const newBrickIndex = bricks.length; // This is now the index of the newly added brick
-              
-            //   return [
-            //     ...prev, 
-            //     { 
-            //       brickIndex: newBrickIndex, 
-            //       username: message.data.username,
-            //       brickId: newBrick.id // Store the brick ID for more robust identification
-            //     }
-            //   ];
-            // });
-          }
           break;
 
         case MessageType.CHANNEL_BRICK_DELETED:
@@ -348,7 +317,6 @@ export default function V0Blocks() {
               interactionMode={interactionMode}
               isInCooldown={isInCooldown}
               totalTime={totalTime}
-              brickUsers={brickUsers}
               users={users}
               onUserHover={handleUserHover}
             />
@@ -393,7 +361,6 @@ export default function V0Blocks() {
                 onThemeChange={handleThemeChange}
                 bricksCount={bricks.length}
               />
-              <AudioPlayer />
               {isInCooldown && <CooldownIndicator remainingTime={cooldownRemaining} />}
 
               {/* User hover card */}

@@ -19,7 +19,6 @@ interface UseSceneInteractionProps {
   isPlaying: boolean
   interactionMode: "build" | "move" | "erase"
   isInCooldown?: boolean
-  brickUsers?: BrickWithUser[]
   users?: User[]
   onUserHover?: (user: User | null, position: { x: number; y: number }) => void
 }
@@ -34,7 +33,6 @@ export function useSceneInteraction({
   isPlaying,
   interactionMode,
   isInCooldown = false,
-  brickUsers = [],
   users = [],
   onUserHover,
 }: UseSceneInteractionProps) {
@@ -194,20 +192,14 @@ export function useSceneInteraction({
 
   // Find user associated with a brick
   const findUserForBrick = (brickIndex: number): User | null => {
-    if (!brickUsers || !users) return null
+    if (!users || users.length === 0) return null
 
     const brick = bricks[brickIndex];
-    if (!brick) return null;
+    if (!brick || !brick.username) return null;
     
-    // First try to find by brickId (more reliable)
-    const brickUser = brickUsers.find((bu) => 
-      (bu.brickId && brick.id && bu.brickId === brick.id) || bu.brickIndex === brickIndex
-    );
-    
-    if (!brickUser) return null
-
-    const user = users.find((u) => u.id === brickUser.username)
-    return user || null
+    // Find user with matching username
+    const user = users.find((u) => u.id === brick.username);
+    return user || null;
   }
 
   useFrame(() => {
