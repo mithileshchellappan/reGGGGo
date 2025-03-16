@@ -4,6 +4,7 @@ import type { Dispatch, SetStateAction } from "react"
 
 // Define types for our brick and history
 export type Brick = {
+  id: string
   color: string
   position: [number, number, number]
   width: number
@@ -45,9 +46,12 @@ export const handleAddBrick = (
   setHistoryIndex: Dispatch<SetStateAction<number>>,
 ) => {
   const newBricks = [...bricks, brick]
-  setBricks(newBricks)
+  const uniqueBricks = newBricks.filter((brick, index, self) =>
+    index === self.findIndex((t) => t.id === brick.id)
+  )
+  setBricks(uniqueBricks)
   const newHistory = history.slice(0, historyIndex + 1)
-  newHistory.push(newBricks)
+  newHistory.push(uniqueBricks)
   setHistory(newHistory)
   setHistoryIndex(historyIndex + 1)
 
@@ -65,11 +69,13 @@ export const handleDeleteBrick = (
   setHistory: Dispatch<SetStateAction<BrickHistory>>,
   setHistoryIndex: Dispatch<SetStateAction<number>>,
 ) => {
-  const newBricks = bricks.filter((_, i) => i !== index)
-  setBricks(newBricks)
-  console.log("newBricks", bricks, newBricks, newBricks === bricks)
+  const newBricks = bricks.filter((brick) => brick.id !== bricks[index].id)
+  const uniqueBricks = newBricks.filter((brick, index, self) =>
+    index === self.findIndex((t) => t.id === brick.id)
+  )
+  setBricks(uniqueBricks)
   const newHistory = history.slice(0, historyIndex + 1)
-  newHistory.push(newBricks)
+  newHistory.push(uniqueBricks)
   setHistory(newHistory)
   setHistoryIndex(historyIndex + 1)
 

@@ -10,7 +10,7 @@ import { EraseMode } from "./erase-mode"
 import { LightingSetup } from "./lighting-setup"
 import { useSceneInteraction } from "./use-scene-interaction"
 import { Block } from "../block"
-import { GRID_SIZE } from "@/lib/constants"
+import { GRID_SIZE } from "../../lib/constants"
 import { ClockAnimation } from "../clock-animation"
 
 export const Scene: React.FC<SceneProps> = ({
@@ -42,6 +42,7 @@ export const Scene: React.FC<SceneProps> = ({
     handleTouchEnd,
     handleBrickClick,
     planeRef,
+    previewBrickId,
   } = useSceneInteraction({
     bricks,
     width,
@@ -67,6 +68,7 @@ export const Scene: React.FC<SceneProps> = ({
       {bricks.map((brick, index) => (
         <Block
           key={index}
+          id={brick.id}
           color={brick.color}
           position={brick.position}
           width={brick.width}
@@ -85,6 +87,7 @@ export const Scene: React.FC<SceneProps> = ({
           selectedColor={selectedColor}
           width={width}
           depth={depth}
+          previewBrickId={previewBrickId}
         />
       )}
 

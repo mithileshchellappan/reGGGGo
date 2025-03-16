@@ -7,8 +7,10 @@ import { useFrame } from "@react-three/fiber"
 import { Instances, Instance, useTexture, Html } from "@react-three/drei"
 import { BRICK_HEIGHT, LAYER_GAP, STUD_HEIGHT, STUD_RADIUS, STUD_SEGMENTS, TEXTURES } from "../../lib/constants"
 import type { BlockProps } from "./types"
+import type { ThreeEvent } from "@react-three/fiber"
 
 export const Block: React.FC<BlockProps> = ({
+  id,
   color,
   position,
   width,
@@ -81,7 +83,7 @@ export const Block: React.FC<BlockProps> = ({
   }, [color, isPlacing, isEraseHighlight])
 
   // Handle click with stopPropagation to ensure the correct block is deleted
-  const handleClick = (e: THREE.ThreeEvent<MouseEvent>) => {
+  const handleClick = (e: ThreeEvent<MouseEvent>) => {
     e.stopPropagation()
     if (onClick) onClick()
   }
@@ -112,6 +114,7 @@ export const Block: React.FC<BlockProps> = ({
       }}
       onPointerOver={() => setIsHovered(true)}
       onPointerOut={() => setIsHovered(false)}
+      userData={{ id }}
     >
       <mesh ref={brickRef} geometry={blockGeometry} castShadow receiveShadow>
         <meshStandardMaterial

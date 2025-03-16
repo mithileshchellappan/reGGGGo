@@ -11,6 +11,7 @@ interface BuildModeProps {
   selectedColor: string
   width: number
   depth: number
+  previewBrickId: string
 }
 
 export const BuildMode: React.FC<BuildModeProps> = ({
@@ -20,12 +21,14 @@ export const BuildMode: React.FC<BuildModeProps> = ({
   selectedColor,
   width,
   depth,
+  previewBrickId,
 }) => {
   if (!showNewBrick) return null
 
   return (
     <>
       <Block
+        id={previewBrickId}
         color={selectedColor}
         position={currentBrickPosition}
         width={width}

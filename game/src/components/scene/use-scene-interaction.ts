@@ -1,11 +1,13 @@
 "use client"
 
-import { useState, useRef, useEffect } from "react"
+import { useState, useRef, useEffect, useMemo } from "react"
 import * as THREE from "three"
 import { useFrame, useThree } from "@react-three/fiber"
 import { GRID_SIZE, BRICK_HEIGHT, LAYER_GAP, GROUND_HEIGHT } from "../../lib/constants"
-import type { Brick } from "../v0-blocks/events"
-import type { User } from "../../lib/real-time"
+import type { Brick,  } from "../v0-blocks/events"
+import type { User, BrickWithUser } from "../../lib/real-time"
+import type { ThreeEvent } from "@react-three/fiber"
+import { v4 as uuidv4 } from 'uuid'
 
 interface UseSceneInteractionProps {
   bricks: Brick[]
@@ -48,6 +50,9 @@ export function useSceneInteraction({
   const [touchedBrickIndex, setTouchedBrickIndex] = useState<number | null>(null)
   const [isDeleting, setIsDeleting] = useState(false)
   const [isMobile, setIsMobile] = useState(false)
+
+  // Generate a consistent ID for the preview and actual brick
+  const previewBrickId = useMemo(() => uuidv4(), []);
 
   // Touch interaction tracking
   const [touchStartPosition, setTouchStartPosition] = useState<{ x: number; y: number } | null>(null)
@@ -192,7 +197,7 @@ export function useSceneInteraction({
     const brickUser = brickUsers.find((bu) => bu.brickIndex === brickIndex)
     if (!brickUser) return null
 
-    const user = users.find((u) => u.id === brickUser.userId)
+    const user = users.find((u) => u.id === brickUser.username)
     return user || null
   }
 
@@ -262,7 +267,7 @@ export function useSceneInteraction({
     }
   })
 
-  const handleClick = (event: THREE.MouseEvent) => {
+  const handleClick = (event: ThreeEvent<MouseEvent>) => {
     // Prevent default behavior to avoid unintended actions
     event.stopPropagation()
 
@@ -275,12 +280,12 @@ export function useSceneInteraction({
         return
       }
 
-      onAddBrick({ color: selectedColor, position: currentBrickPosition, width, height: depth })
+      onAddBrick({ id: previewBrickId, color: selectedColor, position: currentBrickPosition, width, height: depth })
     }
   }
 
   // Touch handlers for mobile
-  const handleTouchStart = (event: THREE.ThreeEvent<PointerEvent>) => {
+  const handleTouchStart = (event: ThreeEvent<PointerEvent>) => {
     if (isPlaying) return
 
     // Record the starting position for all modes
@@ -305,7 +310,7 @@ export function useSceneInteraction({
     }
   }
 
-  const handleTouchMove = (event: THREE.ThreeEvent<PointerEvent>) => {
+  const handleTouchMove = (event: ThreeEvent<PointerEvent>) => {
     if (isPlaying) return
 
     if (touchStartPosition) {
@@ -332,7 +337,7 @@ export function useSceneInteraction({
     }
   }
 
-  const handleTouchEnd = (event: THREE.ThreeEvent<PointerEvent>) => {
+  const handleTouchEnd = (event: ThreeEvent<PointerEvent>) => {
     if (isPlaying) return
 
     if (interactionMode === "build") {
@@ -344,7 +349,7 @@ export function useSceneInteraction({
           return
         }
 
-        onAddBrick({ color: selectedColor, position: currentBrickPosition, width, height: depth })
+        onAddBrick({ id: previewBrickId, color: selectedColor, position: currentBrickPosition, width, height: depth })
       }
     } else if (interactionMode === "erase" && touchedBrickIndex !== null) {
       // For erase mode, delete the brick on touch end if we didn't move much
@@ -417,6 +422,7 @@ export function useSceneInteraction({
     handleTouchEnd,
     handleBrickClick,
     planeRef,
+    previewBrickId,
   }
 }
 

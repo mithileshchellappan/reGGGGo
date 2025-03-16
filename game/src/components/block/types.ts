@@ -1,4 +1,5 @@
 export interface BlockProps {
+  id?: string
   color: string
   position: [number, number, number]
   width: number
