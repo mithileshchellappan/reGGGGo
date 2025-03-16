@@ -12,8 +12,6 @@ export type Brick = {
   username?: string
 }
 
-export type BrickHistory = Brick[][]
-
 // Event handlers
 // Add these functions to emit events when bricks are added or deleted
 export const emitBrickAdded = (brick: Brick) => {
@@ -53,10 +51,6 @@ export const handleAddBrick = (
   brick: Brick,
   bricks: Brick[],
   setBricks: Dispatch<SetStateAction<Brick[]>>,
-  history: BrickHistory,
-  historyIndex: number,
-  setHistory: Dispatch<SetStateAction<BrickHistory>>,
-  setHistoryIndex: Dispatch<SetStateAction<number>>,
   isFromChannel = false, // Add flag to indicate if this action came from channel
 ) => {
   // Check if the brick with this ID already exists
@@ -67,11 +61,6 @@ export const handleAddBrick = (
   console.log(bricks,brick)
   const newBricks = [...bricks, brick];
   setBricks(newBricks);
-  
-  const newHistory = history.slice(0, historyIndex + 1);
-  newHistory.push(newBricks);
-  setHistory(newHistory);
-  setHistoryIndex(historyIndex + 1);
 
   // Only emit the event if it's a local action, not from channel
   if (!isFromChannel) {
@@ -85,10 +74,6 @@ export const handleDeleteBrick = (
   index: number,
   bricks: Brick[],
   setBricks: Dispatch<SetStateAction<Brick[]>>,
-  history: BrickHistory,
-  historyIndex: number,
-  setHistory: Dispatch<SetStateAction<BrickHistory>>,
-  setHistoryIndex: Dispatch<SetStateAction<number>>,
   isFromChannel = false, // Add flag to indicate if this action came from channel
 ) => {
   const brickToDelete = brick;
@@ -106,10 +91,6 @@ export const handleDeleteBrick = (
   console.log(`After filtering, bricks count: ${newBricks.length}`);
   
   setBricks(newBricks);
-  const newHistory = history.slice(0, historyIndex + 1);
-  newHistory.push(newBricks);
-  setHistory(newHistory);
-  setHistoryIndex(historyIndex + 1);
 
   // Only emit the event if it's a local action, not from channel
   if (!isFromChannel) {
@@ -123,53 +104,15 @@ export const handleUpdateBrick = (
   newPosition: [number, number, number],
   bricks: Brick[],
   setBricks: Dispatch<SetStateAction<Brick[]>>,
-  history: BrickHistory,
-  historyIndex: number,
-  setHistory: Dispatch<SetStateAction<BrickHistory>>,
-  setHistoryIndex: Dispatch<SetStateAction<number>>,
 ) => {
   const newBricks = bricks.map((brick, i) => (i === index ? { ...brick, position: newPosition } : brick))
   setBricks(newBricks)
-  const newHistory = history.slice(0, historyIndex + 1)
-  newHistory.push(newBricks)
-  setHistory(newHistory)
-  setHistoryIndex(historyIndex + 1)
-}
-
-export const handleUndo = (
-  historyIndex: number,
-  setHistoryIndex: Dispatch<SetStateAction<number>>,
-  history: BrickHistory,
-  setBricks: Dispatch<SetStateAction<Brick[]>>,
-) => {
-  if (historyIndex > 0) {
-    const newIndex = historyIndex - 1
-    setHistoryIndex(newIndex)
-    setBricks(history[newIndex])
-  }
-}
-
-export const handleRedo = (
-  historyIndex: number,
-  setHistoryIndex: Dispatch<SetStateAction<number>>,
-  history: BrickHistory,
-  setBricks: Dispatch<SetStateAction<Brick[]>>,
-) => {
-  if (historyIndex < history.length - 1) {
-    const newIndex = historyIndex + 1
-    setHistoryIndex(newIndex)
-    setBricks(history[newIndex])
-  }
 }
 
 export const handleClearSet = (
   setBricks: Dispatch<SetStateAction<Brick[]>>,
-  setHistory: Dispatch<SetStateAction<BrickHistory>>,
-  setHistoryIndex: Dispatch<SetStateAction<number>>,
 ) => {
   setBricks([])
-  setHistory([[]])
-  setHistoryIndex(0)
 }
 
 export const handlePlayToggle = (isPlaying: boolean, setIsPlaying: Dispatch<SetStateAction<boolean>>) => {

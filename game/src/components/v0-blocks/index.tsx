@@ -16,14 +16,12 @@ import { useTouchHandling } from "./use-touch-handling"
 import { useCooldown } from "./use-cooldown"
 import { CooldownIndicator } from "../cooldown-indicator"
 import { DEFAULT_TIMER_DURATION, GRID_SIZE, MAX_GRID_SIZE, updateGridSize } from "../../lib/constants"
-import { sendMessage, onMessage, MessageType, type User, type BrickWithUser } from "../../lib/real-time"
+import { sendMessage, onMessage, MessageType, type User } from "../../lib/real-time"
 import type { Brick } from "./events"
 import {
   handleAddBrick,
   handleDeleteBrick,
   handleUpdateBrick,
-  handleUndo,
-  handleRedo,
   handleClearSet,
   handlePlayToggle,
 } from "./events"
@@ -39,8 +37,6 @@ export default function V0Blocks() {
   // State
   const [bricks, setBricks] = useState<Brick[]>([])
   const [username, setUsername] = useState<string>("")
-  const [history, setHistory] = useState<Brick[][]>([[]])
-  const [historyIndex, setHistoryIndex] = useState(0)
   const [width, setWidth] = useState(2)
   const [depth, setDepth] = useState(2)
   const [isPlaying, setIsPlaying] = useState(false)
@@ -105,14 +101,6 @@ export default function V0Blocks() {
             const updatedBricks = [...currentBricks, newBrick];
             console.log("✅ Brick added, new total:", updatedBricks.length);
             
-            // Update history and historyIndex in separate state setters
-            setHistory(currentHistory => {
-              const currentIndex = historyIndex;
-              const newHistory = [...currentHistory.slice(0, currentIndex + 1), updatedBricks];
-              setHistoryIndex(currentIndex + 1);
-              return newHistory;
-            });
-            
             return updatedBricks;
           });
           break;
@@ -143,14 +131,6 @@ export default function V0Blocks() {
               ...currentBricks.slice(0, brickIndex),
               ...currentBricks.slice(brickIndex + 1)
             ];
-            
-            // Update history separately 
-            setHistory(currentHistory => {
-              const currentIndex = historyIndex;
-              const newHistory = [...currentHistory.slice(0, currentIndex + 1), updatedBricks];
-              setHistoryIndex(currentIndex + 1);
-              return newHistory;
-            });
             
             return updatedBricks;
           });
@@ -194,10 +174,10 @@ export default function V0Blocks() {
     (brick: Brick) => {
       if (isInCooldown) return // Don't add brick if in cooldown
       brick.username = username
-      handleAddBrick(brick, bricks, setBricks, history, historyIndex, setHistory, setHistoryIndex)
+      handleAddBrick(brick, bricks, setBricks)
       startCooldown() // Start cooldown after adding a brick
     },
-    [bricks, history, historyIndex, isInCooldown, startCooldown],
+    [bricks, isInCooldown, startCooldown, username],
   )
 
   const onDeleteBrick = useCallback(
@@ -221,29 +201,25 @@ export default function V0Blocks() {
         index,
         bricks, 
         setBricks,
-        history,
-        historyIndex,
-        setHistory,
-        setHistoryIndex,
         false
       );
       
       // Start cooldown after deleting
       startCooldown();
     },
-    [bricks, history, historyIndex, isInCooldown, startCooldown, setHistory, setHistoryIndex],
+    [bricks, isInCooldown, startCooldown],
   )
 
   const onUpdateBrick = useCallback(
     (index: number, newPosition: [number, number, number]) => {
-      handleUpdateBrick(index, newPosition, bricks, setBricks, history, historyIndex, setHistory, setHistoryIndex)
+      handleUpdateBrick(index, newPosition, bricks, setBricks)
     },
-    [bricks, history, historyIndex],
+    [bricks],
   )
 
   const onClearSet = useCallback(() => {
     console.log("Clear set triggered")
-    handleClearSet(setBricks, setHistory, setHistoryIndex)
+    handleClearSet(setBricks)
     // Close the modal
     setShowClearModal(false)
   }, [])
