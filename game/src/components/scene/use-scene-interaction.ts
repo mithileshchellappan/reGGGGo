@@ -5,7 +5,6 @@ import * as THREE from "three"
 import { useFrame, useThree } from "@react-three/fiber"
 import { GRID_SIZE, BRICK_HEIGHT, LAYER_GAP, GROUND_HEIGHT } from "../../lib/constants"
 import type { Brick,  } from "../v0-blocks/events"
-import type { User, BrickWithUser } from "../../lib/real-time"
 import type { ThreeEvent } from "@react-three/fiber"
 import { v4 as uuidv4 } from 'uuid'
 
@@ -19,8 +18,6 @@ interface UseSceneInteractionProps {
   isPlaying: boolean
   interactionMode: "build" | "move" | "erase"
   isInCooldown?: boolean
-  users?: User[]
-  onUserHover?: (user: User | null, position: { x: number; y: number }) => void
 }
 
 export function useSceneInteraction({
@@ -33,8 +30,6 @@ export function useSceneInteraction({
   isPlaying,
   interactionMode,
   isInCooldown = false,
-  users = [],
-  onUserHover,
 }: UseSceneInteractionProps) {
   const [currentBrickPosition, setCurrentBrickPosition] = useState<[number, number, number]>([
     0,
@@ -190,18 +185,6 @@ export function useSceneInteraction({
     return null
   }
 
-  // Find user associated with a brick
-  const findUserForBrick = (brickIndex: number): User | null => {
-    if (!users || users.length === 0) return null
-
-    const brick = bricks[brickIndex];
-    if (!brick || !brick.username) return null;
-    
-    // Find user with matching username
-    const user = users.find((u) => u.id === brick.username);
-    return user || null;
-  }
-
   useFrame(() => {
     // Skip raycaster calculations when in play mode or when deleting
     if (isPlaying || isDeleting) return
@@ -235,35 +218,9 @@ export function useSceneInteraction({
       const brickIndex = findBrickAtPointer()
       if (brickIndex !== null) {
         setHoveredBrickIndex(brickIndex)
-
-        // If in move mode and we have a user hover callback, show user info
-        if (interactionMode === "move" && onUserHover && brickIndex !== prevHoveredIndex) {
-          const user = findUserForBrick(brickIndex)
-
-          // Convert 3D position to screen coordinates
-          if (user) {
-            // Get the brick position
-            const brick = bricks[brickIndex]
-            const brickPosition = new THREE.Vector3(
-              brick.position[0],
-              brick.position[1] + BRICK_HEIGHT / 2 + 0.5, // Position above the brick
-              brick.position[2],
-            )
-
-            // Project to screen coordinates
-            const screenPosition = brickPosition.project(camera)
-            const x = (screenPosition.x * 0.5 + 0.5) * gl.domElement.clientWidth
-            const y = (-(screenPosition.y * 0.5) + 0.5) * gl.domElement.clientHeight
-
-            onUserHover(user, { x, y })
-          } else if (prevHoveredIndex !== null && prevHoveredIndex !== brickIndex) {
-            // Clear hover if we moved to a brick without a user
-            onUserHover(null, { x: 0, y: 0 })
-          }
-        }
-      } else if (interactionMode === "move" && onUserHover && prevHoveredIndex !== null) {
+      } else if (interactionMode === "move" && prevHoveredIndex !== null) {
         // Clear hover if we're not hovering over any brick
-        onUserHover(null, { x: 0, y: 0 })
+        setHoveredBrickIndex(null)
       }
     }
   })

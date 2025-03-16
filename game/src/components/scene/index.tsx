@@ -25,8 +25,6 @@ export const Scene: React.FC<SceneProps> = ({
   isInCooldown = false,
   timeRemaining = 0,
   totalTime = 0,
-  users = [],
-  onUserHover,
 }) => {
   const {
     currentBrickPosition,
@@ -50,8 +48,6 @@ export const Scene: React.FC<SceneProps> = ({
     isPlaying,
     interactionMode,
     isInCooldown,
-    users,
-    onUserHover,
   })
 
   return (

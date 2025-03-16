@@ -39,24 +39,8 @@ export enum MessageType {
   BRICK_DELETED = "brickDeleted",
   TIMER_UPDATE = "timerUpdate",
   CANVAS_RESIZE = "canvasResize",
-  USER_JOINED = "userJoined",
-  USER_LEFT = "userLeft",
   INITIAL_DATA="initialData",
   CHANNEL_BRICK_ADDED = "channelBrickAdded",
   CHANNEL_BRICK_DELETED = "channelBrickDeleted",
-}
-
-// User type
-export interface User {
-  id: string
-  username: string
-  avatarUrl: string
-}
-
-// Brick with user information
-export interface BrickWithUser {
-  brickIndex: number
-  username: string
-  brickId?: string
 }
 

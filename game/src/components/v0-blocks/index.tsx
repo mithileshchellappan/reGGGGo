@@ -9,7 +9,6 @@ import { ColorSelector } from "../color-selector"
 import { ActionToolbar } from "../action-toolbar"
 import { ClearConfirmationModal } from "./clear-confirmation-modal"
 import { CanvasResizeModal } from "../canvas-resize-modal"
-import { UserHoverCard } from "../user-hover-card"
 import { useKeyboardShortcuts } from "./use-keyboard-shortcuts"
 import { useColorTheme } from "./use-color-theme"
 import { useTouchHandling } from "./use-touch-handling"
@@ -17,7 +16,7 @@ import { useCooldown } from "./use-cooldown"
 import { CooldownIndicator } from "../cooldown-indicator"
 import { LoadingBrick } from "./loading-brick"
 import { DEFAULT_TIMER_DURATION, GRID_SIZE, MAX_GRID_SIZE, updateGridSize } from "../../lib/constants"
-import { sendMessage, onMessage, MessageType, type User } from "../../lib/real-time"
+import { sendMessage, onMessage, MessageType } from "../../lib/real-time"
 import type { Brick } from "./events"
 import {
   handleAddBrick,
@@ -51,11 +50,6 @@ export default function V0Blocks() {
   // Timer state
   const [totalTime, setTotalTime] = useState(DEFAULT_TIMER_DURATION)
   const [timerActive, setTimerActive] = useState(false)
-
-  // User state
-  const [users, setUsers] = useState<User[]>([])
-  const [hoveredUser, setHoveredUser] = useState<User | null>(null)
-  const [hoveredUserPosition, setHoveredUserPosition] = useState({ x: 0, y: 0 })
 
   // Cooldown state
   const { isInCooldown, cooldownRemaining, startCooldown } = useCooldown(3000) // 5 seconds cooldown
@@ -149,18 +143,6 @@ export default function V0Blocks() {
           const newSize = message.size as number
           updateGridSize(newSize)
           break
-
-        case MessageType.USER_JOINED:
-          // Add user
-          const newUser = message.user as User
-          setUsers((prev) => [...prev.filter((u) => u.id !== newUser.id), newUser])
-          break
-
-        case MessageType.USER_LEFT:
-          // Remove user
-          const userId = message.userId as string
-          setUsers((prev) => prev.filter((u) => u.id !== userId))
-          break
       }
     })
     
@@ -232,11 +214,6 @@ export default function V0Blocks() {
 
   const handleModeChange = useCallback((mode: "build" | "move" | "erase") => {
     setInteractionMode(mode)
-
-    // Clear hovered user when changing modes
-    if (mode !== "move") {
-      setHoveredUser(null)
-    }
   }, [])
 
   const handleCanvasResize = useCallback((size: number) => {
@@ -248,11 +225,6 @@ export default function V0Blocks() {
       type: MessageType.CANVAS_RESIZE,
       size: newSize,
     })
-  }, [])
-
-  const handleUserHover = useCallback((user: User | null, position: { x: number; y: number }) => {
-    setHoveredUser(user)
-    setHoveredUserPosition(position)
   }, [])
 
   // Set up keyboard shortcuts
@@ -310,8 +282,6 @@ export default function V0Blocks() {
               interactionMode={interactionMode}
               isInCooldown={isInCooldown}
               totalTime={totalTime}
-              users={users}
-              onUserHover={handleUserHover}
             />
             <OrbitControls
               ref={orbitControlsRef}
@@ -355,13 +325,6 @@ export default function V0Blocks() {
                 bricksCount={bricks.length}
               />
               {isInCooldown && <CooldownIndicator remainingTime={cooldownRemaining} />}
-
-              {/* User hover card */}
-              <UserHoverCard
-                user={hoveredUser}
-                position={hoveredUserPosition}
-                visible={interactionMode === "move" && hoveredUser !== null}
-              />
             </>
           )}
           {isPlaying && (
