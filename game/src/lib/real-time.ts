@@ -34,6 +34,6 @@ export interface User {
 // Brick with user information
 export interface BrickWithUser {
   brickIndex: number
-  userId: string
+  username: string
 }
 

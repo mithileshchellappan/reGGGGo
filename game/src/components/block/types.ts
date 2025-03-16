@@ -5,6 +5,7 @@ export interface BlockProps {
   height: number
   isPlacing?: boolean
   opacity?: number
+  username?: string
   onClick?: () => void
 }
 

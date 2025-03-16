@@ -36,6 +36,7 @@ export default function V0Blocks() {
 
   // State
   const [bricks, setBricks] = useState<Brick[]>([])
+  const [username, setUsername] = useState<string>("")
   const [history, setHistory] = useState<Brick[][]>([[]])
   const [historyIndex, setHistoryIndex] = useState(0)
   const [width, setWidth] = useState(2)
@@ -72,6 +73,7 @@ export default function V0Blocks() {
       switch (message.type) {
         case MessageType.INITIAL_DATA:
           setBricks(message.data.creation.bricks)
+          setUsername(message.data.username)
           break
         case MessageType.BRICK_ADDED:
           // Add brick from another user
@@ -80,14 +82,14 @@ export default function V0Blocks() {
 
           // Update brick user mapping
           if (message.userId) {
-            setBrickUsers((prev) => [...prev, { brickIndex: bricks.length, userId: message.userId }])
+            setBrickUsers((prev) => [...prev, { brickIndex: bricks.length, username: message.username }])
           }
           break
 
         case MessageType.BRICK_DELETED:
           // Delete brick from another user
           const index = message.data.index as number
-          setBricks((prev) => prev.filter((_, i) => i !== index))
+          setBricks((prev) => prev.filter((oldBrick, i) => oldBrick !== message.data.brick as Brick))
 
           // Update brick user mapping
           setBrickUsers((prev) =>

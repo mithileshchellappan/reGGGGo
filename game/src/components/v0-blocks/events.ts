@@ -6,6 +6,7 @@ export type Brick = {
   position: [number, number, number]
   width: number
   height: number
+  username?: string
 }
 
 export type BrickHistory = Brick[][]

@@ -1,11 +1,11 @@
 "use client"
 
 import type React from "react"
-import { useRef, useMemo } from "react"
+import { useRef, useMemo, useState } from "react"
 import * as THREE from "three"
 import { useFrame } from "@react-three/fiber"
-import { Instances, Instance, useTexture } from "@react-three/drei"
-import { BRICK_HEIGHT, LAYER_GAP, STUD_HEIGHT, STUD_RADIUS, STUD_SEGMENTS, TEXTURES } from "@/lib/constants"
+import { Instances, Instance, useTexture, Html } from "@react-three/drei"
+import { BRICK_HEIGHT, LAYER_GAP, STUD_HEIGHT, STUD_RADIUS, STUD_SEGMENTS, TEXTURES } from "../../lib/constants"
 import type { BlockProps } from "./types"
 
 export const Block: React.FC<BlockProps> = ({
@@ -16,7 +16,9 @@ export const Block: React.FC<BlockProps> = ({
   isPlacing = false,
   opacity = 1,
   onClick,
+  username = 'test',
 }) => {
+  const [isHovered, setIsHovered] = useState(false)
   const depth = height
   const blockGeometry = useMemo(() => new THREE.BoxGeometry(width, BRICK_HEIGHT - LAYER_GAP, depth), [width, depth])
   const studGeometry = useMemo(
@@ -108,6 +110,8 @@ export const Block: React.FC<BlockProps> = ({
           onClick()
         }
       }}
+      onPointerOver={() => setIsHovered(true)}
+      onPointerOut={() => setIsHovered(false)}
     >
       <mesh ref={brickRef} geometry={blockGeometry} castShadow receiveShadow>
         <meshStandardMaterial
@@ -140,6 +144,13 @@ export const Block: React.FC<BlockProps> = ({
           <Instance key={index} position={pos} castShadow receiveShadow />
         ))}
       </Instances>
+
+      {/* Username tooltip */}
+      {username && isHovered && !isPlacing && (
+        <Html position={[0, BRICK_HEIGHT, 0]} center distanceFactor={10}>
+          <div className="bg-black/80 text-white px-2 py-1 rounded-md text-sm whitespace-nowrap">{username}</div>
+        </Html>
+      )}
     </group>
   )
 }

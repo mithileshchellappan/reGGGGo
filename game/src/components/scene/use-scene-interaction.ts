@@ -3,9 +3,9 @@
 import { useState, useRef, useEffect } from "react"
 import * as THREE from "three"
 import { useFrame, useThree } from "@react-three/fiber"
-import { GRID_SIZE, BRICK_HEIGHT, LAYER_GAP, GROUND_HEIGHT } from "@/lib/constants"
-import type { Brick } from "@/components/v0-blocks/events"
-import type { User, BrickWithUser } from "@/lib/real-time"
+import { GRID_SIZE, BRICK_HEIGHT, LAYER_GAP, GROUND_HEIGHT } from "../../lib/constants"
+import type { Brick } from "../v0-blocks/events"
+import type { User } from "../../lib/real-time"
 
 interface UseSceneInteractionProps {
   bricks: Brick[]
