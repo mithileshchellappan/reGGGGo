@@ -18,7 +18,7 @@ export const Block: React.FC<BlockProps> = ({
   isPlacing = false,
   opacity = 1,
   onClick,
-  username = 'test',
+  username,
   isInCooldown = false,
 }) => {
   const [isHovered, setIsHovered] = useState(false)

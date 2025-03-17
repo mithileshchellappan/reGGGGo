@@ -64,16 +64,14 @@ export default function V0Blocks() {
 
       switch (message.type) {
         case MessageType.INITIAL_DATA:
-          console.log("🔄 INITIAL_DATA received:", message.data.creation.bricks.length, "bricks");
           
-          // Set initial bricks
           const initialBricks = message.data.creation.bricks;
           setBricks(initialBricks);
           console.log("Initial bricks:", initialBricks)
-          // Set username
           setUsername(message.data.username);
           
-          // Set loading to false
+          updateGridSize(message.data.creation.canvasSize)
+
           setLoading(false);
           break;
 
@@ -215,18 +213,6 @@ export default function V0Blocks() {
   const handleModeChange = useCallback((mode: "build" | "move" | "erase") => {
     setInteractionMode(mode)
   }, [])
-
-  const handleCanvasResize = useCallback((size: number) => {
-    const newSize = updateGridSize(size)
-    console.log(`Canvas resized to ${newSize}x${newSize}`)
-
-    // Send message for real-time updates
-    sendMessage({
-      type: MessageType.CANVAS_RESIZE,
-      size: newSize,
-    })
-  }, [])
-
   // Set up keyboard shortcuts
   useKeyboardShortcuts({
     isPlaying,
@@ -298,15 +284,6 @@ export default function V0Blocks() {
             />
           </Canvas>
 
-          {/* Settings button */}
-          <button
-            onClick={() => setShowResizeModal(true)}
-            className="fixed top-4 left-20 z-50 bg-black/70 rounded-full p-2 text-white"
-            aria-label="Canvas Settings"
-          >
-            <Settings className="w-5 h-5" />
-          </button>
-
           {!isPlaying && (
             <>
               <ActionToolbar onModeChange={handleModeChange} currentMode={interactionMode} />
@@ -339,13 +316,6 @@ export default function V0Blocks() {
 
           {/* Modals */}
           <ClearConfirmationModal isOpen={showClearModal} onClose={() => setShowClearModal(false)} onClear={onClearSet} />
-          <CanvasResizeModal
-            isOpen={showResizeModal}
-            onClose={() => setShowResizeModal(false)}
-            onResize={handleCanvasResize}
-            currentSize={GRID_SIZE}
-            maxSize={MAX_GRID_SIZE}
-          />
         </>
       )}
     </div>

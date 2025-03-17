@@ -8,7 +8,6 @@ import * as THREE from "three"
 export const LoadingBrick = () => {
   const [rotationY, setRotationY] = useState(0)
   const [positionY, setPositionY] = useState(0)
-  const [color, setColor] = useState("#5D3FD3")
   const groupRef = useRef<THREE.Group>(null)
 
   // Animate the brick
@@ -17,11 +16,6 @@ export const LoadingBrick = () => {
     const newY = Math.sin(state.clock.elapsedTime * 1.5) * 0.1
     setPositionY(newY)
     setRotationY(state.clock.elapsedTime * 0.5)
-    
-    // Update color for rainbow effect
-    const hue = (state.clock.getElapsedTime() * 0.05) % 1
-    const newColor = `hsl(${hue * 360}, 70%, 50%)`
-    setColor(newColor)
   })
 
   return (
@@ -34,11 +28,11 @@ export const LoadingBrick = () => {
       ]}
     >
       <Block 
-        color={color}
+        color={"#5D3FD3"}
         position={[0, positionY, 0]}
         width={2}
         height={2}
-        isPlacing={true} 
+        isPlacing={false} 
       />
     </group>
   )
