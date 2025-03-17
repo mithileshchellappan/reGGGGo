@@ -230,7 +230,7 @@ export default function V0Blocks() {
 
   return (
     <div
-      className="fixed inset-0 w-full h-full bg-purple-950 font-sans overflow-hidden"
+      className="fixed inset-0 w-full h-full bg-gradient-to-b from-blue-900 to-black font-sans overflow-hidden"
       onContextMenu={(e) => e.preventDefault()} // Prevent context menu on right-click
     >
       {loading ? (
@@ -239,8 +239,8 @@ export default function V0Blocks() {
             <Canvas shadows camera={{ position: [3, 3, 3], fov: 40 }}>
               <ambientLight intensity={0.5} />
               <directionalLight 
-                position={[5, 5, 5]} 
-                intensity={0.8} 
+                position={[20, 20, 20]} 
+                intensity={6} 
                 castShadow 
                 shadow-mapSize-width={1024} 
                 shadow-mapSize-height={1024}

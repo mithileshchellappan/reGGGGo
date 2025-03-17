@@ -28,7 +28,7 @@ export const LoadingBrick = () => {
       ]}
     >
       <Block 
-        color={"#5D3FD3"}
+        color={"#FF3333"}
         position={[0, positionY, 0]}
         width={2}
         height={2}

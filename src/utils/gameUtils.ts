@@ -40,7 +40,12 @@ export const getCreation = async (context: Context) => {
   const {postId, kvStore: kv} =  context
   const creation = await kv.get(`creation:${postId}`)
   console.log(creation)
-  return JSON.parse(creation as unknown as string) || []
+  const data = JSON.parse(creation as unknown as string)
+  return data ? data : {
+    bricks: [],
+    canvasSize: 0,
+    creationName: ''
+  }
 }
 
 export const deleteBrick = async (context: Context, brick: Brick) => {

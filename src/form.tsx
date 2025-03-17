@@ -54,9 +54,16 @@ export const regggoForm = Devvit.createForm(
         const post = await reddit.submitPost({
             title: `Build: ${what}`,
             subredditName: subreddit,
-            preview: <vstack>
-                <text>Loading...</text>
-            </vstack>
+            preview: <vstack width='100%' height='100%' alignment='center middle'>
+            <image
+              url='loading.gif'
+              description='loading…'
+              height='100%'
+              width='100%'
+              imageHeight='568px'
+              imageWidth='800px'
+            />
+          </vstack>
         });
         const currentUsername = await reddit.getCurrentUsername();
         if (!currentUsername) {

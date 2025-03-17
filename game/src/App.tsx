@@ -5,10 +5,14 @@ import { onMessage, sendMessage } from "./lib/real-time"
 
 function App() {
   useEffect(() => {
-    sendMessage({
-      type: "webViewReady",
-      message: "Hello from Regggo!",
-    })
+    try {
+      sendMessage({
+        type: "webViewReady",
+        message: "Hello from Regggo!",
+      })
+    } catch (error) {
+      console.error(error)
+    }
   }, [])
 
   return (

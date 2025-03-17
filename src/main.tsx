@@ -1,5 +1,3 @@
-import './createPost.js';
-
 import { Devvit, useChannel, useState, useWebView } from '@devvit/public-api';
 
 import type { DevvitMessage, WebViewMessage } from './message.js';
