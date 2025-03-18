@@ -7,87 +7,161 @@ export type User = {
   snoovatarUrl: string
 }
 
-export const createCreation = async (context: Context, postId:string, canvasSize: number, creationName: string ) => {
-  const { kvStore: kv} = context
+export const createCreation = async (context: Context, postId: string, canvasSize: number, creationName: string) => {
+  const { redis } = context;
   const creation = {
     bricks: [],
     canvasSize,
     creationName
-  }
-  await kv.put(`creation:${postId}`, JSON.stringify(creation))
-  return creation
-}
+  };
+  
+  const creationKey = `creation:${postId}`;
+  await redis.set(creationKey, JSON.stringify(creation));
+  return creation;
+};
 
 export const updateCreation = async (context: Context, bricks: Brick) => {
-  console.log("Updating creation", bricks)
-const {postId, kvStore: kv} =  context
-  const creation = await kv.get(`creation:${postId}`)
-  console.log("Getting creation in updateCreation", creation)
-  if (!creation) {
-    const creation = {
-        bricks: [bricks]
-    }
-    await kv.put(`creation:${postId}`, JSON.stringify(creation))
-    console.log("Creation created", creation)
-    return
+  console.log("Updating creation", bricks);
+  const { postId, redis } = context;
+  const creationKey = `creation:${postId}`;
+  
+  // Using Redis transaction for atomic operations
+  const txn = await redis.watch(creationKey);
+  await txn.multi();
+  
+  const creationJson = await redis.get(creationKey);
+  if (!creationJson) {
+    const newCreation = {
+      bricks: [bricks]
+    };
+    await txn.set(creationKey, JSON.stringify(newCreation));
+    console.log("Creation created", newCreation);
+  } else {
+    const creationData = JSON.parse(creationJson);
+    creationData.bricks.push(bricks);
+    await txn.set(creationKey, JSON.stringify(creationData));
   }
-  const creationData = JSON.parse(creation as unknown as string)
-  creationData.bricks.push(bricks)
-  await kv.put(`creation:${postId}`, JSON.stringify(creationData))
-}
+  
+  await txn.exec();
+};
 
 export const getCreation = async (context: Context) => {
-  const {postId, kvStore: kv} =  context
-  const creation = await kv.get(`creation:${postId}`)
-  console.log(creation)
-  const data = JSON.parse(creation as unknown as string)
-  return data ? data : {
-    bricks: [],
-    canvasSize: 0,
-    creationName: ''
+  const { postId, redis } = context;
+  const creationKey = `creation:${postId}`;
+  
+  const creation = await redis.get(creationKey);
+  console.log(creation);
+  
+  if (!creation) {
+    return {
+      bricks: [],
+      canvasSize: 0,
+      creationName: ''
+    };
   }
-}
+  
+  return JSON.parse(creation);
+};
 
 export const deleteBrick = async (context: Context, brick: Brick) => {
-  const {postId, kvStore: kv} =  context
-  const creation = await kv.get(`creation:${postId}`)
-  const creationData = JSON.parse(creation as unknown as string)
-  creationData.bricks = creationData.bricks.filter((b: Brick) => b.id !== brick.id)
-  await kv.put(`creation:${postId}`, JSON.stringify(creationData))
-}
+  const { postId, redis } = context;
+  const creationKey = `creation:${postId}`;
+  
+  // Using Redis transaction
+  const txn = await redis.watch(creationKey);
+  await txn.multi();
+  
+  const creationJson = await redis.get(creationKey);
+  if (creationJson) {
+    const creationData = JSON.parse(creationJson);
+    creationData.bricks = creationData.bricks.filter((b: Brick) => b.id !== brick.id);
+    await txn.set(creationKey, JSON.stringify(creationData));
+  }
+  
+  await txn.exec();
+};
 
 export const addUser = async (context: Context, user: User) => {
-  const {postId, kvStore: kv} =  context
-  const users = await kv.get(`users:${postId}`)
-  if(!users) {
-    await kv.put(`users:${postId}`, JSON.stringify([user]))
-    return
+  const { postId, redis } = context;
+  const usersKey = `users:${postId}`;
+  
+  const txn = await redis.watch(usersKey);
+  await txn.multi();
+  
+  const usersJson = await redis.get(usersKey);
+  if (!usersJson) {
+    await txn.set(usersKey, JSON.stringify([user]));
+  } else {
+    try {
+      const usersData = JSON.parse(usersJson);
+      console.log("usersData", usersData);
+      
+      // Ensure usersData is an array
+      const userArray = Array.isArray(usersData) ? usersData : [];
+      
+      if (!userArray.some((u: User) => u.username === user.username)) {
+        userArray.push(user);
+        await txn.set(usersKey, JSON.stringify(userArray));
+      }
+    } catch (error) {
+      console.error("Error parsing users data:", error);
+      // Reset to a new array with just this user if parsing fails
+      await txn.set(usersKey, JSON.stringify([user]));
+    }
   }
-  const usersData = JSON.parse(users as unknown as string)
-  if(usersData.find((u: User) => u.username === user.username)) {
-    return
-  }
-  usersData.push(user)
-  await kv.put(`users:${postId}`, JSON.stringify(usersData))
-  return usersData
-}
+  
+  await txn.exec();
+  const updatedUsers = await redis.get(usersKey);
+  return updatedUsers ? JSON.parse(updatedUsers) : [];
+};
 
 export const getUsers = async (context: Context) => {
-  const {postId, kvStore: kv} =  context
-  const users = await kv.get(`users:${postId}`)
-  if(!users) {
-    return []
+  const { postId, redis } = context;
+  const usersKey = `users:${postId}`;
+  
+  try {
+    const users = await redis.get(usersKey);
+    
+    if (!users) {
+      return [];
+    }
+    
+    const parsedUsers = JSON.parse(users);
+    return Array.isArray(parsedUsers) ? parsedUsers : [];
+  } catch (error) {
+    console.error("Error getting users:", error);
+    return [];
   }
-  return JSON.parse(users as unknown as string) || []
-}
+};
 
 export const deleteUser = async (context: Context, user: User) => {
-  const {postId, kvStore: kv} =  context
-  const users = await kv.get(`users:${postId}`)
-  let usersData = JSON.parse(users as unknown as string)
-  usersData = usersData.filter((u: User) => u.username !== user.username)
-  console.log("Deleting user", user)
-  console.log("Users data", usersData)
-  await kv.put(`users:${postId}`, JSON.stringify(usersData))
-  return usersData
-}
+  const { postId, redis } = context;
+  const usersKey = `users:${postId}`;
+  
+  // Using Redis transaction
+  const txn = await redis.watch(usersKey);
+  await txn.multi();
+  
+  const usersJson = await redis.get(usersKey);
+  if (usersJson) {
+    try {
+      let usersData = JSON.parse(usersJson);
+      
+      // Ensure usersData is an array
+      const userArray = Array.isArray(usersData) ? usersData : [];
+      
+      const filteredUsers = userArray.filter((u: User) => u.username !== user.username);
+      console.log("Deleting user", user);
+      console.log("Users data", filteredUsers);
+      await txn.set(usersKey, JSON.stringify(filteredUsers));
+    } catch (error) {
+      console.error("Error parsing users data during deletion:", error);
+      // If parsing fails, set an empty array
+      await txn.set(usersKey, JSON.stringify([]));
+    }
+  }
+  
+  await txn.exec();
+  const updatedUsers = await redis.get(usersKey);
+  return updatedUsers ? JSON.parse(updatedUsers) : [];
+};

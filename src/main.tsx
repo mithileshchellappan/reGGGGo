@@ -7,7 +7,6 @@ import { regggoForm } from './form.js';
 Devvit.configure({
   redditAPI: true,
   redis: true,
-  http: true,
   realtime: true
 });
 
@@ -143,55 +142,69 @@ Devvit.addCustomPostType({
     }
     // Render the custom post type
     return (
-<zstack grow alignment="middle center">
-  <image 
-    url="loading.gif"
-    imageWidth={1200}
-    imageHeight={640}
-    resizeMode="cover"
-  />
-  <vstack 
-    grow 
-    padding="small" 
-    alignment="middle center" 
-    backgroundColor="rgba(0, 0, 0, 0.6)" 
-    width="100%" 
-    height="100%"
-  >
-    <vstack alignment="middle center">
-      <text size="xlarge" weight="bold" color="#FFFFFF" alignment="center">
-        {creation?.creationName ?? 'LEGO Challenge'}
-      </text>
-      <text size="medium" color="#FFFFFF" alignment="center">
-        Active Builders: {users && users.length > 0 ? users.length : 0}
-      </text>
-      <spacer size="large" />
-      <button onPress={onMountPress} appearance="primary">
-        Start Building
-      </button>
-      <spacer size="large" />
-      <vstack alignment="middle center">
-        <hstack gap="small"> 
-          {users && users.length > 0 && users.slice(0, 5).map((user) => (
-            <vstack alignment="center" gap="small">
-              <image url={user.snoovatarUrl} imageWidth={50} imageHeight={50} />
-              <text size="xsmall" color="#FFFFFF">{user.username}</text> 
+      <zstack grow alignment="middle center">
+        <image
+          url="loading.gif"
+          imageWidth={1200}
+          imageHeight={640}
+          resizeMode="cover"
+        />
+        <vstack
+          grow
+          padding="small"
+          alignment="middle center"
+          backgroundColor="rgba(0, 0, 0, 0.6)"
+          width="100%"
+          height="100%"
+        >
+          <vstack alignment="middle center">
+            <vstack
+              padding="medium"
+              backgroundColor="rgba(255, 255, 255, 0.2)"
+              cornerRadius="large"
+              alignment="middle center"
+            >
+              <hstack>
+                <text size="xxlarge" weight="bold" color="green" alignment="center">
+                  Build:  
+                </text>
+                <text size="xxlarge" weight="bold" color="#FFFFFF" alignment="center">
+                  {creation?.creationName?.replace('Build ', '') ?? 'REGGGGO'}
+                </text>
+              </hstack>
+              <spacer size="large" />
+              <hstack gap="small">
+                <button onPress={onMountPress} appearance="bordered">
+                  How to Play
+                </button>
+                <button onPress={onMountPress} appearance="primary">
+                  Start Building
+                </button>
+              </hstack>
             </vstack>
-          ))}
-          {users && users.length > 5 && users.slice(5).map((user) => (
-            <vstack alignment="center" gap="small">
-              <image url={user.snoovatarUrl} imageWidth={50} imageHeight={50} />
-              {/* <text size="small" color="#FFFFFF">{user.username}</text>  */}
+            <spacer size="large" />
+            <vstack alignment="middle center">
+              <hstack gap="small">
+              {users && users.length > 0 && users.slice(0, 5).map((user) => (
+                  <vstack alignment="center" gap="small">
+                    <image url={user.snoovatarUrl} imageWidth={50} imageHeight={50} />
+                    <text size="xsmall" color="#FFFFFF">{user.username}</text>
+                  </vstack>
+                ))}
+                {users && users.length > 5 && users.slice(5).map((user) => (
+                  <vstack alignment="center" gap="small">
+                    <image url={user.snoovatarUrl} imageWidth={50} imageHeight={50} />
+                    {/* <text size="small" color="#FFFFFF">{user.username}</text>  */}
+                  </vstack>
+                ))}
+                {users && users.length > 10 && (
+                  <text size="medium" color="#FFFFFF">+{users.length - 10}</text>
+                )}
+              </hstack>
             </vstack>
-          ))}
-          {users && users.length > 10 && (
-            <text size="medium" color="#FFFFFF">+{users.length - 10}</text>
-          )}
-        </hstack>
-      </vstack>
-    </vstack>
-  </vstack>
-</zstack>
+          </vstack>
+        </vstack>
+      </zstack>
     );
   },
 });
