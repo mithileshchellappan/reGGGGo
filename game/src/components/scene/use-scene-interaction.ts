@@ -15,6 +15,7 @@ interface UseSceneInteractionProps {
   selectedColor: string
   onAddBrick: (brick: Brick) => void
   onDeleteBrick?: (brick: Brick, index: number) => void
+  onUpdateBrick?: (index: number, newPosition: [number, number, number]) => void
   isPlaying: boolean
   interactionMode: "build" | "move" | "erase"
   isInCooldown?: boolean
@@ -27,6 +28,7 @@ export function useSceneInteraction({
   selectedColor,
   onAddBrick,
   onDeleteBrick,
+  onUpdateBrick,
   isPlaying,
   interactionMode,
   isInCooldown = false,
@@ -44,6 +46,9 @@ export function useSceneInteraction({
   const [isDeleting, setIsDeleting] = useState(false)
   const [isMobile, setIsMobile] = useState(false)
   const [isAddingBrick, setIsAddingBrick] = useState(false)
+  const [isMovingBrick, setIsMovingBrick] = useState(false)
+  const [selectedBrickIndex, setSelectedBrickIndex] = useState<number | null>(null)
+  const [dragPlaneRef, setDragPlaneRef] = useState<THREE.Mesh | null>(null)
 
   // Generate a consistent ID for the preview brick display only
   // Note: When actually placing a brick, we'll generate a new unique ID
@@ -56,6 +61,10 @@ export function useSceneInteraction({
 
   const { camera, raycaster, mouse, gl } = useThree()
   const planeRef = useRef<THREE.Mesh>(null)
+  const movementPlaneRef = useRef<THREE.Mesh>(null)
+  
+  // Store the initial position of the brick being moved
+  const initialBrickPosition = useRef<[number, number, number] | null>(null)
 
   // Detect mobile device
   useEffect(() => {
@@ -81,6 +90,8 @@ export function useSceneInteraction({
   useEffect(() => {
     setHoveredBrickIndex(null)
     setTouchedBrickIndex(null)
+    setSelectedBrickIndex(null)
+    setIsMovingBrick(false)
 
     // Reset the plane's raycast behavior when switching modes
     if (planeRef.current) {
@@ -128,7 +139,12 @@ export function useSceneInteraction({
       return false
     }
 
-    return !bricks.some((brick) => {
+    return !bricks.some((brick, index) => {
+      // Skip checking against the brick we're currently moving
+      if (interactionMode === "move" && index === selectedBrickIndex) {
+        return false
+      }
+      
       const brickLeft = Math.floor(brick.position[0] - brick.width / 2)
       const brickRight = Math.ceil(brick.position[0] + brick.width / 2)
       const brickTop = Math.floor(brick.position[2] - brick.height / 2)
@@ -185,6 +201,19 @@ export function useSceneInteraction({
     return null
   }
 
+  // Create an invisible movement plane at the same height as the selected brick
+  const createMovementPlane = (yPosition: number) => {
+    if (!movementPlaneRef.current) return
+    
+    movementPlaneRef.current.position.y = yPosition
+    movementPlaneRef.current.visible = false
+    
+    // Make sure the plane is active for raycasting
+    if ((movementPlaneRef.current as any)._originalRaycast) {
+      movementPlaneRef.current.raycast = (movementPlaneRef.current as any)._originalRaycast
+    }
+  }
+
   useFrame(() => {
     // Skip raycaster calculations when in play mode or when deleting
     if (isPlaying || isDeleting) return
@@ -208,8 +237,34 @@ export function useSceneInteraction({
       }
     }
 
+    // Handle move mode - update brick position when dragging
+    if (interactionMode === "move" && isMovingBrick && selectedBrickIndex !== null && movementPlaneRef.current) {
+      const intersects = raycaster.intersectObject(movementPlaneRef.current)
+      
+      if (intersects.length > 0 && onUpdateBrick) {
+        const { x, z } = intersects[0].point
+        const brick = bricks[selectedBrickIndex]
+        
+        // Snap to grid
+        const snappedX = snapToGrid(x, brick.width)
+        const snappedZ = snapToGrid(z, brick.height)
+        
+        // Keep the same y position
+        const newPosition: [number, number, number] = [snappedX, brick.position[1], snappedZ]
+        
+        // Check if the position is valid
+        const isValid = isValidPlacement(newPosition, brick.width, brick.height)
+        
+        if (isValid) {
+          // Update the brick position locally without changing the data yet
+          // (we'll update the data when the drag ends)
+          onUpdateBrick(selectedBrickIndex, newPosition)
+        }
+      }
+    }
+
     // Handle erase mode or move mode - check for brick intersections
-    if ((interactionMode === "erase" || interactionMode === "move") && !isDeleting && !touchedBrickIndex && !isMobile) {
+    if ((interactionMode === "erase" || interactionMode === "move") && !isDeleting && !touchedBrickIndex && !isMobile && !isMovingBrick) {
       // Reset hovered brick index
       const prevHoveredIndex = hoveredBrickIndex
       setHoveredBrickIndex(null)
@@ -280,6 +335,21 @@ export function useSceneInteraction({
       if (brickIndex !== null) {
         setTouchedBrickIndex(brickIndex)
       }
+    } else if (interactionMode === "move" && !isMovingBrick) {
+      // For move mode, find and select the brick on touch start
+      raycaster.setFromCamera(mouse, camera)
+      const brickIndex = findBrickAtPointer()
+      
+      if (brickIndex !== null) {
+        setSelectedBrickIndex(brickIndex)
+        setIsMovingBrick(true)
+        
+        // Store initial position in case we need to revert
+        initialBrickPosition.current = [...bricks[brickIndex].position] as [number, number, number]
+        
+        // Create a movement plane at the same height as the selected brick
+        createMovementPlane(bricks[brickIndex].position[1])
+      }
     }
   }
 
@@ -308,6 +378,8 @@ export function useSceneInteraction({
         setTouchedBrickIndex(brickIndex)
       }
     }
+    
+    // Move mode doesn't need special handling here - the useFrame handles the movement
   }
 
   const handleTouchEnd = (event: ThreeEvent<PointerEvent>) => {
@@ -347,6 +419,19 @@ export function useSceneInteraction({
         setIsDeleting(true)
         onDeleteBrick(bricks[touchedBrickIndex], touchedBrickIndex)
       }
+    } else if (interactionMode === "move" && isMovingBrick && selectedBrickIndex !== null) {
+      // For move mode, finish the drag operation
+      setIsMovingBrick(false)
+      
+      // Disable the movement plane
+      if (movementPlaneRef.current && (movementPlaneRef.current as any)._originalRaycast) {
+        const dummyRaycast = () => {}
+        movementPlaneRef.current.raycast = dummyRaycast
+      }
+      
+      // Clear the selected brick index
+      setSelectedBrickIndex(null)
+      initialBrickPosition.current = null
     }
 
     // Reset touch tracking
@@ -414,7 +499,10 @@ export function useSceneInteraction({
     handleTouchEnd,
     handleBrickClick,
     planeRef,
+    movementPlaneRef,
     previewBrickId,
+    isMovingBrick,
+    selectedBrickIndex,
   }
 }
 

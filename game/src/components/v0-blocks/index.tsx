@@ -264,6 +264,7 @@ export default function V0Blocks() {
               depth={depth}
               onAddBrick={onAddBrick}
               onDeleteBrick={onDeleteBrick}
+              onUpdateBrick={onUpdateBrick}
               isPlaying={isPlaying}
               interactionMode={interactionMode}
               isInCooldown={isInCooldown}
@@ -278,9 +279,9 @@ export default function V0Blocks() {
               maxDistance={40} // Maximum zoom distance
               autoRotate={isPlaying}
               autoRotateSpeed={1}
-              enableZoom={!isPlaying && interactionMode === "move"}
-              enablePan={!isPlaying && interactionMode === "move"}
-              enableRotate={!isPlaying && interactionMode === "move"}
+              enableZoom={!isPlaying}
+              enablePan={!isPlaying}
+              enableRotate={!isPlaying}
             />
           </Canvas>
 

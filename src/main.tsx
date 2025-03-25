@@ -1,4 +1,4 @@
-import { Devvit, useChannel, useState, useWebView } from '@devvit/public-api';
+import { Devvit, Post, useAsync, useChannel, useState, useWebView } from '@devvit/public-api';
 
 import type { DevvitMessage, WebViewMessage } from './message.js';
 import { addUser, deleteBrick, deleteUser, getCreation, getUsers, updateCreation, User } from './utils/gameUtils.js';
@@ -38,7 +38,6 @@ Devvit.addCustomPostType({
     )
     const [creation, setCreation] = useState(async () => await getCreation(context))
     const [users, setUsers] = useState<User[]>(async () => await getUsers(context))
-
 
     const webView = useWebView<WebViewMessage, DevvitMessage>({
       // URL of your web view content

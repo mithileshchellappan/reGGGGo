@@ -20,6 +20,7 @@ export const Scene: React.FC<SceneProps> = ({
   depth,
   onAddBrick,
   onDeleteBrick,
+  onUpdateBrick,
   isPlaying,
   interactionMode = "build",
   isInCooldown = false,
@@ -37,7 +38,10 @@ export const Scene: React.FC<SceneProps> = ({
     handleTouchEnd,
     handleBrickClick,
     planeRef,
+    movementPlaneRef,
     previewBrickId,
+    isMovingBrick,
+    selectedBrickIndex,
   } = useSceneInteraction({
     bricks,
     width,
@@ -45,6 +49,7 @@ export const Scene: React.FC<SceneProps> = ({
     selectedColor,
     onAddBrick,
     onDeleteBrick,
+    onUpdateBrick,
     isPlaying,
     interactionMode,
     isInCooldown,
@@ -66,7 +71,7 @@ export const Scene: React.FC<SceneProps> = ({
           width={brick.width}
           height={brick.height}
           username={brick.username}
-          isPlacing={hoveredBrickIndex === index && (interactionMode === "erase" || interactionMode === "move")}
+          isPlacing={hoveredBrickIndex === index && (interactionMode === "erase" || (interactionMode === "move" && !isMovingBrick)) || (isMovingBrick && selectedBrickIndex === index)}
           onClick={() => handleBrickClick(brick,index)}
           isInCooldown={isInCooldown}
         />
@@ -104,6 +109,16 @@ export const Scene: React.FC<SceneProps> = ({
         onPointerLeave={handleTouchEnd}
       >
         <planeGeometry args={[GRID_SIZE, GRID_SIZE]} />
+        <meshBasicMaterial visible={false} />
+      </mesh>
+
+      {/* Invisible plane for moving bricks - aligned with the camera view */}
+      <mesh
+        ref={movementPlaneRef}
+        rotation={[0, 0, 0]}
+        position={[0, 0, 0]}
+      >
+        <planeGeometry args={[GRID_SIZE * 2, GRID_SIZE * 2]} />
         <meshBasicMaterial visible={false} />
       </mesh>
 
