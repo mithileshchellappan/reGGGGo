@@ -1,0 +1,19 @@
+{
+  "products": [
+    {
+      "sku": "moss",
+      "displayName": "Moss",
+      "description": "A green moss texture for your blocks",
+      "price": 5,
+      "accountingType": "DURABLE",
+      "images": {
+        "icon": "image-textures/moss.png"
+      },
+      "metadata": {
+        "type": "texture",
+        "category": "nature"
+      }
+    }
+
+  ]
+}

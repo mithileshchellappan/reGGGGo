@@ -1,14 +1,19 @@
-import { Devvit, Post, useAsync, useChannel, useState, useWebView } from '@devvit/public-api';
+import { Devvit, useChannel, useState, useWebView } from '@devvit/public-api';
 
 import type { DevvitMessage, WebViewMessage } from './message.js';
 import { addUser, deleteBrick, deleteUser, getCreation, getUsers, updateCreation, User } from './utils/gameUtils.js';
 import { regggoForm } from './form.js';
+import { ProductsList } from './store.js';
+import { setupPaymentHandler } from './paymentHandler.js';
 
 Devvit.configure({
   redditAPI: true,
   redis: true,
   realtime: true
 });
+
+// Set up payment handling
+setupPaymentHandler();
 
 Devvit.addMenuItem({
   label: 'Launch a Reggggo Builder',
@@ -23,7 +28,7 @@ Devvit.addMenuItem({
 
 // Add a custom post type to Devvit
 Devvit.addCustomPostType({
-  name: 'Web View Example',
+  name: 'Reggggo Builder',
   height: 'tall',
   render: (context) => {
     const [[username, snoovatarURL]] = useState<[string, string]>(
@@ -38,12 +43,11 @@ Devvit.addCustomPostType({
     )
     const [creation, setCreation] = useState(async () => await getCreation(context))
     const [users, setUsers] = useState<User[]>(async () => await getUsers(context))
+    const [showStore, setShowStore] = useState(false)
 
     const webView = useWebView<WebViewMessage, DevvitMessage>({
-      // URL of your web view content
       url: 'index.html',
 
-      // Handle messages sent from the web view
       async onMessage(message, webView) {
         console.log("current user in web view:", username)
         console.log("Message from web view:", message.type)
@@ -139,70 +143,99 @@ Devvit.addCustomPostType({
       const newUsers = await addUser(context, { username: username, snoovatarUrl: snoovatarURL })
       setUsers(newUsers)
     }
+
+    function onShopPress() {
+      setShowStore(true)
+    }
+
     // Render the custom post type
     return (
       <zstack grow alignment="middle center">
+        <vstack
+          grow
+          backgroundColor="rgba(0, 0, 0, 0.6)"
+          alignment="middle center"
+          width="100%"
+          height="100%"
+        >
         <image
           url="loading.gif"
           imageWidth={1200}
           imageHeight={640}
           resizeMode="cover"
-        />
-        <vstack
-          grow
-          padding="small"
-          alignment="middle center"
-          backgroundColor="rgba(0, 0, 0, 0.6)"
-          width="100%"
-          height="100%"
-        >
-          <vstack alignment="middle center">
-            <vstack
-              padding="medium"
-              backgroundColor="rgba(255, 255, 255, 0.2)"
-              cornerRadius="large"
-              alignment="middle center"
-            >
-              <hstack>
-                <text size="xxlarge" weight="bold" color="green" alignment="center">
-                  Build:  
-                </text>
-                <text size="xxlarge" weight="bold" color="#FFFFFF" alignment="center">
-                  {creation?.creationName?.replace('Build ', '') ?? 'REGGGGO'}
-                </text>
-              </hstack>
-              <spacer size="large" />
-              <hstack gap="small">
-                <button onPress={onMountPress} appearance="bordered">
-                  How to Play
-                </button>
-                <button onPress={onMountPress} appearance="primary">
-                  Start Building
-                </button>
-              </hstack>
-            </vstack>
-            <spacer size="large" />
-            <vstack alignment="middle center">
-              <hstack gap="small">
-              {users && users.length > 0 && users.slice(0, 5).map((user) => (
-                  <vstack alignment="center" gap="small">
-                    <image url={user.snoovatarUrl} imageWidth={50} imageHeight={50} />
-                    <text size="xsmall" color="#FFFFFF">{user.username}</text>
-                  </vstack>
-                ))}
-                {users && users.length > 5 && users.slice(5).map((user) => (
-                  <vstack alignment="center" gap="small">
-                    <image url={user.snoovatarUrl} imageWidth={50} imageHeight={50} />
-                    {/* <text size="small" color="#FFFFFF">{user.username}</text>  */}
-                  </vstack>
-                ))}
-                {users && users.length > 10 && (
-                  <text size="medium" color="#FFFFFF">+{users.length - 10}</text>
-                )}
-              </hstack>
-            </vstack>
-          </vstack>
+          />
         </vstack>
+        {showStore ? (
+          <vstack
+            grow
+            padding="medium"
+            backgroundColor="rgba(0, 0, 0, 0.6)"
+            cornerRadius="large"
+          >
+            <hstack alignment="middle" width="100%">
+              <text size="xlarge" weight="bold" color="#FFFFFF">Shop</text>
+              <spacer />
+              <button onPress={() => setShowStore(false)} appearance="bordered">Close</button>
+            </hstack>
+            <spacer size="medium" />
+            <ProductsList context={context} />
+          </vstack>
+        ) : (
+            <vstack
+              grow
+              padding="small"
+              alignment="middle center"
+              width="100%"
+              height="100%"
+            >
+              <vstack alignment="middle center">
+                <vstack
+                  padding="medium"
+                  backgroundColor="rgba(0, 0, 0, 0.6)"
+                  cornerRadius="large"
+                  alignment="middle center"
+                >
+                  <hstack>
+                    <text size="xxlarge" weight="bold" color="green" alignment="center">
+                      Build:
+                    </text>
+                    <text size="xxlarge" weight="bold" color="#FFFFFF" alignment="center">
+                      {creation?.creationName?.replace('Build ', '') ?? 'REGGGGO'}
+                    </text>
+                  </hstack>
+                  <spacer size="large" />
+                  <hstack gap="small">
+                    <button onPress={onShopPress} appearance="bordered">
+                      🛒 Shop
+                    </button>
+                    <button onPress={onMountPress} appearance="primary">
+                      Start Building
+                    </button>
+                  </hstack>
+                </vstack>
+                <spacer size="large" />
+                <vstack alignment="middle center">
+                  <hstack gap="small">
+                    {users && users.length > 0 && users.slice(0, 5).map((user) => (
+                      <vstack alignment="center" gap="small">
+                        <image url={user.snoovatarUrl} imageWidth={50} imageHeight={50} />
+                        <text size="xsmall" color="#FFFFFF">{user.username}</text>
+                      </vstack>
+                    ))}
+                    {users && users.length > 5 && users.slice(5).map((user) => (
+                      <vstack alignment="center" gap="small">
+                        <image url={user.snoovatarUrl} imageWidth={50} imageHeight={50} />
+                        {/* <text size="small" color="#FFFFFF">{user.username}</text>  */}
+                      </vstack>
+                    ))}
+                    {users && users.length > 10 && (
+                      <text size="medium" color="#FFFFFF">+{users.length - 10}</text>
+                    )}
+                  </hstack>
+                </vstack>
+              </vstack>
+          </vstack>
+        )}
       </zstack>
     );
   },
