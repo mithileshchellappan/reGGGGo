@@ -2,7 +2,10 @@
 
 import type React from "react"
 import { Block } from "../block"
+import { ImageBlock } from "../block/image-block"
 import { HighlightSquare } from "../highlight-square"
+import type { BlockType } from "../block/types"
+import { SPECIAL_IMAGES } from "../../lib/constants"
 
 interface BuildModeProps {
   showNewBrick: boolean
@@ -11,7 +14,9 @@ interface BuildModeProps {
   selectedColor: string
   width: number
   depth: number
-  previewBrickId: string
+  selectedBlockType: BlockType
+  selectedSpecialImage?: string
+  isSpecialLocked?: boolean
 }
 
 export const BuildMode: React.FC<BuildModeProps> = ({
@@ -21,21 +26,44 @@ export const BuildMode: React.FC<BuildModeProps> = ({
   selectedColor,
   width,
   depth,
-  previewBrickId,
+  selectedBlockType,
+  selectedSpecialImage = SPECIAL_IMAGES[0].imageUrl,
+  isSpecialLocked = false,
 }) => {
   if (!showNewBrick) return null
 
+  // Determine which block component to render based on selected block type
+  const renderBlockPreview = () => {
+    if (selectedBlockType === "special" && selectedSpecialImage) {
+      return (
+        <ImageBlock
+          color={selectedColor}
+          position={currentBrickPosition}
+          width={width}
+          height={depth}
+          isPlacing={true}
+          opacity={0.6}
+          imageUrl={selectedSpecialImage}
+          isLocked={isSpecialLocked}
+        />
+      )
+    } else {
+      return (
+        <Block
+          color={selectedColor}
+          position={currentBrickPosition}
+          width={width}
+          height={depth}
+          isPlacing={true}
+          opacity={0.6}
+        />
+      )
+    }
+  }
+
   return (
     <>
-      <Block
-        id={previewBrickId}
-        color={selectedColor}
-        position={currentBrickPosition}
-        width={width}
-        height={depth}
-        isPlacing={true}
-        opacity={0.6} // Make the highlight brick semi-transparent
-      />
+      {renderBlockPreview()}
       <HighlightSquare
         position={[currentBrickPosition[0], 0.01, currentBrickPosition[2]]}
         isValid={isValid}

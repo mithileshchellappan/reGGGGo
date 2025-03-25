@@ -3,11 +3,11 @@
 import type React from "react"
 import { useState } from "react"
 import { Check } from "lucide-react"
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import { Popover, PopoverContent, PopoverTrigger } from "../../components/ui/popover"
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "../../components/ui/dropdown-menu"
 import { SimpleTooltip } from "../simple-tooltip"
 import { MaybeTooltip } from "./maybe-tooltip"
-import { lightenColor } from "@/lib/utils/lighten-color"
+import { lightenColor } from "../../lib/utils/lighten-color"
 import type { ColorTheme } from "./types"
 import { COLOR_THEMES } from "./types"
 
@@ -18,6 +18,7 @@ interface ColorPickerProps {
   currentTheme: ColorTheme
   onThemeChange: (theme: ColorTheme) => void
   isMobile: boolean
+  showThemeSelector?: boolean
 }
 
 export const ColorPicker: React.FC<ColorPickerProps> = ({
@@ -55,7 +56,7 @@ export const ColorPicker: React.FC<ColorPickerProps> = ({
     ],
   }
 
-  const ColorButton = ({ color, isSelected, onClick, index }) => (
+  const ColorButton = ({ color, isSelected, onClick, index }: { color: string, isSelected: boolean, onClick: () => void, index: number }) => (
     <MaybeTooltip text={`${colorNames[currentTheme][index]} (${index + 1})`} isMobile={isMobile}>
       <button
         className={`w-8 h-8 rounded-full transition-all ${isSelected ? "ring-2 ring-white ring-offset-1 ring-offset-gray-800" : ""}`}
@@ -141,7 +142,7 @@ export const ColorPicker: React.FC<ColorPickerProps> = ({
               const themes = ["default", "muted", "monochrome"]
               const currentIndex = themes.indexOf(currentTheme)
               const nextIndex = (currentIndex + 1) % themes.length
-              onThemeChange(themes[nextIndex])
+              onThemeChange(themes[nextIndex] as ColorTheme)
             }}
           >
             <div className="w-full h-full relative">
@@ -179,7 +180,6 @@ export const ColorPicker: React.FC<ColorPickerProps> = ({
           </PopoverTrigger>
           <PopoverContent className="w-[280px] p-3" align="center" side="top">
             <div className="mb-2">
-              <h3 className="text-sm font-medium text-gray-700 mb-1">Default</h3>
               <div className="grid grid-cols-4 gap-2">
                 {COLOR_THEMES.default.map((color, index) => (
                   <button
@@ -198,7 +198,6 @@ export const ColorPicker: React.FC<ColorPickerProps> = ({
             </div>
 
             <div className="mb-2">
-              <h3 className="text-sm font-medium text-gray-700 mb-1">Muted</h3>
               <div className="grid grid-cols-4 gap-2">
                 {COLOR_THEMES.muted.map((color, index) => (
                   <button
@@ -217,7 +216,6 @@ export const ColorPicker: React.FC<ColorPickerProps> = ({
             </div>
 
             <div>
-              <h3 className="text-sm font-medium text-gray-700 mb-1">Monochrome</h3>
               <div className="grid grid-cols-4 gap-2">
                 {COLOR_THEMES.monochrome.map((color, index) => (
                   <button

@@ -1,6 +1,7 @@
 import { sendMessage } from "../../lib/real-time"
 import { MessageType } from "../../lib/real-time"
 import type { Dispatch, SetStateAction } from "react"
+import { BlockType } from "../block/types"
 
 // Define types for our brick and history
 export type Brick = {
@@ -10,7 +11,11 @@ export type Brick = {
   width: number
   height: number
   username?: string
+  imageUrl?: string
+  blockType?: BlockType
+  isLocked?: boolean
 }
+
 
 // Event handlers
 // Add these functions to emit events when bricks are added or deleted

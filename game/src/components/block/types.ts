@@ -9,5 +9,8 @@ export interface BlockProps {
   username?: string
   onClick?: () => void
   isInCooldown?: boolean
+  imageUrl?: string
+  isLocked?: boolean
 }
 
+export type BlockType = "regular" | "special"

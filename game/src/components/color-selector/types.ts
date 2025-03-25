@@ -13,6 +13,7 @@ export interface ColorSelectorProps {
   currentTheme: ColorTheme
   onThemeChange: (theme: ColorTheme) => void
   bricksCount: number
+  showThemeSelector?: boolean
 }
 
 export type ColorTheme = "default" | "muted" | "monochrome"

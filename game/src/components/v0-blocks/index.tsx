@@ -8,7 +8,6 @@ import { Scene } from "../scene"
 import { ColorSelector } from "../color-selector"
 import { ActionToolbar } from "../action-toolbar"
 import { ClearConfirmationModal } from "./clear-confirmation-modal"
-import { CanvasResizeModal } from "../canvas-resize-modal"
 import { useKeyboardShortcuts } from "./use-keyboard-shortcuts"
 import { useColorTheme } from "./use-color-theme"
 import { useTouchHandling } from "./use-touch-handling"
@@ -18,6 +17,7 @@ import { LoadingBrick } from "./loading-brick"
 import { DEFAULT_TIMER_DURATION, GRID_SIZE, MAX_GRID_SIZE, updateGridSize } from "../../lib/constants"
 import { sendMessage, onMessage, MessageType } from "../../lib/real-time"
 import type { Brick } from "./events"
+import type { BlockType } from "../../components/block/types"
 import {
   handleAddBrick,
   handleDeleteBrick,
@@ -42,6 +42,11 @@ export default function V0Blocks() {
   const [isPlaying, setIsPlaying] = useState(false)
   const [interactionMode, setInteractionMode] = useState<"build" | "move" | "erase">("build")
   const orbitControlsRef = useRef<any>(null)
+  
+  // Special block state
+  const [selectedBlockType, setSelectedBlockType] = useState<BlockType>("regular")
+  const [selectedSpecialImage, setSelectedSpecialImage] = useState<string>("/assets/image-textures/moss.jpg")
+  const [isSpecialLocked, setIsSpecialLocked] = useState<boolean>(false)
 
   // Modal state
   const [showClearModal, setShowClearModal] = useState(false)
@@ -154,11 +159,24 @@ export default function V0Blocks() {
   const onAddBrick = useCallback(
     (brick: Brick) => {
       if (isInCooldown) return // Don't add brick if in cooldown
-      brick.username = username
-      handleAddBrick(brick, bricks, setBricks)
+      
+      // Add properties to the brick based on block type
+      const brickWithProps = {
+        ...brick,
+        username,
+        blockType: selectedBlockType,
+        ...(selectedBlockType === "special" && selectedSpecialImage
+          ? {
+              imageUrl: selectedSpecialImage,
+              isLocked: isSpecialLocked,
+            }
+          : {}),
+      }
+      
+      handleAddBrick(brickWithProps, bricks, setBricks)
       startCooldown() // Start cooldown after adding a brick
     },
-    [bricks, isInCooldown, startCooldown, username],
+    [bricks, isInCooldown, startCooldown, username, selectedBlockType, selectedSpecialImage, isSpecialLocked],
   )
 
   const onDeleteBrick = useCallback(
@@ -171,6 +189,12 @@ export default function V0Blocks() {
       const brickToDelete = brick;
       if (!brickToDelete) {
         console.error(`No brick found at index ${index}, can't delete`);
+        return;
+      }
+
+      // Check if the brick is locked
+      if (brickToDelete.isLocked) {
+        console.log(`Brick with ID ${brickToDelete.id} is locked, cannot delete`);
         return;
       }
       
@@ -269,6 +293,9 @@ export default function V0Blocks() {
               interactionMode={interactionMode}
               isInCooldown={isInCooldown}
               totalTime={totalTime}
+              selectedBlockType={selectedBlockType}
+              selectedSpecialImage={selectedSpecialImage}
+              isSpecialLocked={isSpecialLocked}
             />
             <OrbitControls
               ref={orbitControlsRef}
@@ -301,6 +328,12 @@ export default function V0Blocks() {
                 currentTheme={currentTheme}
                 onThemeChange={handleThemeChange}
                 bricksCount={bricks.length}
+                selectedBlockType={selectedBlockType}
+                onSelectBlockType={setSelectedBlockType}
+                selectedSpecialImage={selectedSpecialImage}
+                onSelectSpecialImage={setSelectedSpecialImage}
+                isSpecialLocked={isSpecialLocked}
+                onToggleSpecialLock={setIsSpecialLocked}
               />
               {isInCooldown && <CooldownIndicator remainingTime={cooldownRemaining} />}
             </>

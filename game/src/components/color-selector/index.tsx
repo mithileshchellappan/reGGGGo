@@ -1,14 +1,27 @@
 "use client"
 
 import type React from "react"
+
 import { useState, useEffect } from "react"
 import type { ColorSelectorProps } from "./types"
 import { ColorPicker } from "./color-picker"
 import { DimensionControls } from "./dimension-controls"
 import { FileControls } from "./file-controls"
 import { MobileMenu } from "./mobile-menu"
+import { Toolbox } from "./toolbox"
+import { SpecialSelector } from "./special-selector"
+import type { BlockType } from "../block/types"
 
-export const ColorSelector: React.FC<ColorSelectorProps> = ({
+interface ExtendedColorSelectorProps extends ColorSelectorProps {
+  selectedBlockType: BlockType
+  onSelectBlockType: (blockType: BlockType) => void
+  selectedSpecialImage: string
+  onSelectSpecialImage: (url: string) => void
+  isSpecialLocked: boolean
+  onToggleSpecialLock: (locked: boolean) => void
+}
+
+export const ColorSelector: React.FC<ExtendedColorSelectorProps> = ({
   colors,
   selectedColor,
   onSelectColor,
@@ -21,6 +34,13 @@ export const ColorSelector: React.FC<ColorSelectorProps> = ({
   currentTheme,
   onThemeChange,
   bricksCount,
+  showThemeSelector = true,
+  selectedBlockType,
+  onSelectBlockType,
+  selectedSpecialImage,
+  onSelectSpecialImage,
+  isSpecialLocked,
+  onToggleSpecialLock,
 }) => {
   const [isMobile, setIsMobile] = useState(false)
 
@@ -40,15 +60,31 @@ export const ColorSelector: React.FC<ColorSelectorProps> = ({
       {/* Main Controls Panel - Very rounded with smaller padding */}
       <div className="bg-gradient-to-b from-gray-800 to-gray-900 backdrop-blur-md px-6 py-3 rounded-[28px] shadow-lg border border-gray-700 text-white">
         <div className="flex items-center gap-3">
-          {/* Color Selector */}
-          <ColorPicker
-            colors={colors}
-            selectedColor={selectedColor}
-            onSelectColor={onSelectColor}
-            currentTheme={currentTheme}
-            onThemeChange={onThemeChange}
-            isMobile={isMobile}
-          />
+
+          {/* Block Type Selector */}
+          <Toolbox selectedBlockType={selectedBlockType} onSelectBlockType={onSelectBlockType} />
+
+          <div className="w-px h-6 bg-gray-600" />
+
+          {/* Color Selector (only show for regular blocks) */}
+          {selectedBlockType === "regular" ? (
+            <ColorPicker
+              colors={colors}
+              selectedColor={selectedColor}
+              onSelectColor={onSelectColor}
+              currentTheme={currentTheme}
+              onThemeChange={onThemeChange}
+              isMobile={isMobile}
+              showThemeSelector={showThemeSelector}
+            />
+          ) : (
+            <SpecialSelector
+              selectedImage={selectedSpecialImage}
+              onSelectImage={onSelectSpecialImage}
+              isLocked={isSpecialLocked}
+              onToggleLock={onToggleSpecialLock}
+            />
+          )}
 
           <div className="w-px h-6 bg-gray-600" />
 

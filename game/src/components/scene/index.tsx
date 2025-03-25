@@ -1,7 +1,7 @@
 "use client"
 
 import type React from "react"
-import { Environment, SoftShadows } from "@react-three/drei"
+import { Environment, SoftShadows, OrbitControls } from "@react-three/drei"
 import type { SceneProps } from "./types"
 import { LargePlane } from "../large-plane"
 import { Platform } from "../platform"
@@ -10,22 +10,32 @@ import { EraseMode } from "./erase-mode"
 import { LightingSetup } from "./lighting-setup"
 import { useSceneInteraction } from "./use-scene-interaction"
 import { Block } from "../block"
+import { ImageBlock } from "../block/image-block"
 import { GRID_SIZE } from "../../lib/constants"
 import { ClockAnimation } from "../clock-animation"
+import type { BlockType } from "../block/types"
 
-export const Scene: React.FC<SceneProps> = ({
+interface ExtendedSceneProps extends SceneProps {
+  selectedBlockType: BlockType
+  selectedSpecialImage: string
+  isSpecialLocked: boolean
+}
+
+export const Scene: React.FC<ExtendedSceneProps> = ({
   bricks,
   selectedColor,
   width,
   depth,
   onAddBrick,
   onDeleteBrick,
-  onUpdateBrick,
   isPlaying,
   interactionMode = "build",
   isInCooldown = false,
   timeRemaining = 0,
   totalTime = 0,
+  selectedBlockType,
+  selectedSpecialImage,
+  isSpecialLocked,
 }) => {
   const {
     currentBrickPosition,
@@ -38,10 +48,6 @@ export const Scene: React.FC<SceneProps> = ({
     handleTouchEnd,
     handleBrickClick,
     planeRef,
-    movementPlaneRef,
-    previewBrickId,
-    isMovingBrick,
-    selectedBrickIndex,
   } = useSceneInteraction({
     bricks,
     width,
@@ -49,7 +55,6 @@ export const Scene: React.FC<SceneProps> = ({
     selectedColor,
     onAddBrick,
     onDeleteBrick,
-    onUpdateBrick,
     isPlaying,
     interactionMode,
     isInCooldown,
@@ -61,21 +66,54 @@ export const Scene: React.FC<SceneProps> = ({
       <LargePlane />
       <Platform />
 
+      {/* Orbit controls for camera rotation */}
+      <OrbitControls
+        makeDefault
+        enablePan={true}
+        enableZoom={true}
+        enableRotate={true}
+        minDistance={5}
+        maxDistance={50}
+      />
+
       {/* Render all bricks */}
-      {bricks.map((brick, index) => (
-        <Block
-          key={index}
-          id={brick.id}
-          color={brick.color}
-          position={brick.position}
-          width={brick.width}
-          height={brick.height}
-          username={brick.username}
-          isPlacing={hoveredBrickIndex === index && (interactionMode === "erase" || (interactionMode === "move" && !isMovingBrick)) || (isMovingBrick && selectedBrickIndex === index)}
-          onClick={() => handleBrickClick(brick,index)}
-          isInCooldown={isInCooldown}
-        />
-      ))}
+      {bricks.map((brick, index) => {
+        // Use appropriate block component based on brick type
+        const isHovered = hoveredBrickIndex === index && (interactionMode === "erase" || interactionMode === "move")
+
+        // Check for blockType property
+        const blockType = brick.blockType || "regular"
+
+        // If it's special and has imageUrl, use ImageBlock, otherwise use regular Block
+        if (blockType === "special" && brick.imageUrl) {
+          return (
+            <ImageBlock
+              key={index}
+              color={brick.color}
+              position={brick.position}
+              width={brick.width}
+              height={brick.height}
+              username={brick.username}
+              isPlacing={isHovered}
+              onClick={() => handleBrickClick(brick, index)}
+              imageUrl={brick.imageUrl}
+            />
+          )
+        } else {
+          return (
+            <Block
+              key={index}
+              color={brick.color}
+              position={brick.position}
+              width={brick.width}
+              height={brick.height}
+              username={brick.username}
+              isPlacing={isHovered}
+              onClick={() => handleBrickClick(brick,index)}
+            />
+          )
+        }
+      })}
 
       {/* Render appropriate mode components */}
       {interactionMode === "build" && !isPlaying && (
@@ -86,7 +124,9 @@ export const Scene: React.FC<SceneProps> = ({
           selectedColor={selectedColor}
           width={width}
           depth={depth}
-          previewBrickId={previewBrickId}
+          selectedBlockType={selectedBlockType}
+          selectedSpecialImage={selectedSpecialImage}
+          isSpecialLocked={isSpecialLocked}
         />
       )}
 
@@ -109,16 +149,6 @@ export const Scene: React.FC<SceneProps> = ({
         onPointerLeave={handleTouchEnd}
       >
         <planeGeometry args={[GRID_SIZE, GRID_SIZE]} />
-        <meshBasicMaterial visible={false} />
-      </mesh>
-
-      {/* Invisible plane for moving bricks - aligned with the camera view */}
-      <mesh
-        ref={movementPlaneRef}
-        rotation={[0, 0, 0]}
-        position={[0, 0, 0]}
-      >
-        <planeGeometry args={[GRID_SIZE * 2, GRID_SIZE * 2]} />
         <meshBasicMaterial visible={false} />
       </mesh>
 

@@ -42,3 +42,37 @@ export const MARBLE_TEXTURES = {
   color: "assets/textures/marble_color.jpg",
 }
 
+export const SPECIAL_IMAGES = [
+  {
+    id: "moss",
+    imageUrl: "/assets/image-textures/moss.jpg",
+  },
+  // {
+  //   id: "brick",
+  //   imageUrl: "/assets/image-textures/brick.jpg",
+  // },
+  // {
+  //   id: "wood",
+  //   imageUrl: "/assets/image-textures/wood.jpg",
+  // },
+  // {
+  //   id: "metal",
+  //   imageUrl: "/assets/image-textures/metal.jpg",
+  // },
+  // {
+  //   id: "stone",
+  //   imageUrl: "/assets/image-textures/stone.jpg",
+  // },
+  // {
+  //   id: "grass",
+  //   imageUrl: "/assets/image-textures/grass.jpg",
+  // },
+  // {
+  //   id: "tile",
+  //   imageUrl: "/assets/image-textures/tile.jpg",
+  // },
+  // {
+  //   id: "water",
+  //   imageUrl: "/assets/image-textures/water.jpg",
+  // }
+]
