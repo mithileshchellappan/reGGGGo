@@ -1,5 +1,5 @@
 /* @ts-ignore */
-import type { Brick } from "./game/src/components/v0-blocks/events"
+import type { Brick } from "./game/src/components/blocks/events"
 
 /** Message from Devvit to the web view. */
 

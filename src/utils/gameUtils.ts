@@ -1,6 +1,6 @@
 import type { Context } from '@devvit/public-api';
 /* @ts-ignore */
-import type { Brick } from '../../game/src/components/v0-blocks/events';
+import type { Brick } from '../../game/src/components/blocks/events';
 
 export type User = {
   username: string

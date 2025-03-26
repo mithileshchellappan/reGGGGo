@@ -1,4 +1,4 @@
-import type { Brick } from "../v0-blocks/events"
+import type { Brick } from "../blocks/events"
 
 export interface SceneProps {
   bricks: Brick[]

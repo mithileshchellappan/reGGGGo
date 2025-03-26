@@ -4,7 +4,7 @@ import { useState, useRef, useEffect, useMemo } from "react"
 import * as THREE from "three"
 import { useFrame, useThree } from "@react-three/fiber"
 import { GRID_SIZE, BRICK_HEIGHT, LAYER_GAP, GROUND_HEIGHT } from "../../lib/constants"
-import type { Brick,  } from "../v0-blocks/events"
+import type { Brick,  } from "../blocks/events"
 import type { ThreeEvent } from "@react-three/fiber"
 import { v4 as uuidv4 } from 'uuid'
 

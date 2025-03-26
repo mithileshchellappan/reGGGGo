@@ -1,4 +1,4 @@
-import V0Blocks from "./components/v0-blocks"
+import V0Blocks from "./components/blocks"
 import { ThemeProvider } from "./components/theme-provider"
 import { useEffect } from "react"
 import { onMessage, sendMessage } from "./lib/real-time"

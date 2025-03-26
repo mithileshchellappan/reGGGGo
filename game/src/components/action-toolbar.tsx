@@ -25,7 +25,7 @@ export const ActionToolbar: React.FC<ActionToolbarProps> = ({ onModeChange, curr
   }, [])
 
   // Conditionally render tooltip based on device
-  const MaybeTooltip = ({ text, children }) => {
+  const MaybeTooltip = ({ text, children }: { text: string, children: React.ReactNode }) => {
     if (isMobile) {
       return children
     }
