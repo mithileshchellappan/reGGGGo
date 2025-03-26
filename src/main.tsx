@@ -12,7 +12,6 @@ Devvit.configure({
   realtime: true
 });
 
-// Set up payment handling
 setupPaymentHandler();
 
 Devvit.addMenuItem({
@@ -182,7 +181,7 @@ Devvit.addCustomPostType({
               <button onPress={() => setShowStore(false)} appearance="bordered">Close</button>
             </hstack>
             <spacer size="medium" />
-            <ProductsList context={context} />
+            <ProductsList purchases={userPurchases} setUserPurchases={setUserPurchases} context={context} />
           </vstack>
         ) : (
             <vstack

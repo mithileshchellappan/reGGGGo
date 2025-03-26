@@ -2,16 +2,15 @@ import { useProducts, usePayments, OnPurchaseResult, useOrders } from "@devvit/p
 import { Devvit, useState } from "@devvit/public-api";
 import { addUserPurchase, getUserPurchases } from "./utils/paymentUtils.js";
 
-export function ProductsList({ context }: { context: any }) {
+export function ProductsList({ context, purchases, setUserPurchases }: { context: any, purchases: any, setUserPurchases: (userPurchases: any) => void }) {
     const { products } = useProducts(context);
     const payments = usePayments(async (result: OnPurchaseResult) => {
         if(result.status === 1) {
             const userPurchases = await addUserPurchase(context, result.sku);
-            setOrders(userPurchases);
+            setUserPurchases(userPurchases);
         }
     });
 
-    const [orders, setOrders] = useState(async() => await getUserPurchases(context));
     // Pagination state
     const [currentPage, setCurrentPage] = useState(0);
     const itemsPerPage = 3;
@@ -76,7 +75,7 @@ export function ProductsList({ context }: { context: any }) {
                                 <text color="#FFFFFF" weight="bold">{product.displayName}</text>
                             </vstack>
                             <vstack alignment="end">
-                                {orders?.purchases[product.sku] ? <button disabled appearance="bordered">
+                                {purchases?.purchases[product.sku] ? <button disabled appearance="bordered">
                                     Purchased!
                                 </button> :  
                                 <button
