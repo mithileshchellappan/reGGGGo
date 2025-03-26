@@ -50,7 +50,6 @@ export const getCreation = async (context: Context) => {
   const creationKey = `creation:${postId}`;
   
   const creation = await redis.get(creationKey);
-  console.log(creation);
   
   if (!creation) {
     return {

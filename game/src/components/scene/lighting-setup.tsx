@@ -24,14 +24,14 @@ export const LightingSetup: React.FC = () => {
 
   return (
     <>
-      {/* Higher ambient light for more even illumination */}
-      <ambientLight intensity={0.6} />
+      {/* Reduced ambient light intensity for better shadows */}
+      <ambientLight intensity={0.3} />
 
-      {/* Main directional light - softer */}
+      {/* Main directional light with improved shadow settings */}
       <directionalLight
         ref={directionalLightRef}
         position={[10, 12, 8]}
-        intensity={0.25}
+        intensity={0.4}
         castShadow
         shadow-mapSize={[2048, 2048]}
         shadow-camera-far={50}
@@ -42,18 +42,8 @@ export const LightingSetup: React.FC = () => {
         shadow-bias={-0.0001}
       />
 
-      <directionalLight position={[-8, 5, -8]} intensity={0.2} castShadow={false} />
-      <directionalLight position={[8, 6, -8]} intensity={0.2} castShadow={false} />
-      <directionalLight position={[-8, 6, 8]} intensity={0.2} castShadow={false} />
-      
-      <directionalLight position={[0, -5, 0]} intensity={0.1} castShadow={false} />
-      
-      <pointLight position={[10, 10, 10]} intensity={0.15} distance={30} decay={2} />
-      <pointLight position={[-10, 10, -10]} intensity={0.15} distance={30} decay={2} />
-      <pointLight position={[10, 10, -10]} intensity={0.15} distance={30} decay={2} />
-      <pointLight position={[-10, 10, 10]} intensity={0.15} distance={30} decay={2} />
-      
-      <hemisphereLight args={["#ffffff", "#f0f0ff", 0.3]} />
+      {/* Secondary fill light from opposite direction */}
+      <directionalLight position={[-8, 5, -8]} intensity={0.3} castShadow={false} />
     </>
   )
 }
