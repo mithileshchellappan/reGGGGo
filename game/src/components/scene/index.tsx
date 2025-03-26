@@ -1,6 +1,7 @@
 "use client"
 
 import type React from "react"
+import { useState } from "react"
 import { Environment, SoftShadows, OrbitControls } from "@react-three/drei"
 import type { SceneProps } from "./types"
 import { LargePlane } from "../large-plane"
@@ -14,11 +15,13 @@ import { ImageBlock } from "../block/image-block"
 import { GRID_SIZE } from "../../lib/constants"
 import { ClockAnimation } from "../clock-animation"
 import type { BlockType } from "../block/types"
+import { FPVControls } from "./fpv-controls"
 
 interface ExtendedSceneProps extends SceneProps {
   selectedBlockType: BlockType
   selectedSpecialImage: string
   isSpecialLocked: boolean
+  cameraMode?: "orbit" | "fpv"
 }
 
 export const Scene: React.FC<ExtendedSceneProps> = ({
@@ -36,6 +39,7 @@ export const Scene: React.FC<ExtendedSceneProps> = ({
   selectedBlockType,
   selectedSpecialImage,
   isSpecialLocked,
+  cameraMode = "orbit",
 }) => {
   const {
     currentBrickPosition,
@@ -66,15 +70,19 @@ export const Scene: React.FC<ExtendedSceneProps> = ({
       <LargePlane />
       <Platform />
 
-      {/* Orbit controls for camera rotation */}
-      <OrbitControls
-        makeDefault
-        enablePan={true}
-        enableZoom={true}
-        enableRotate={true}
-        minDistance={5}
-        maxDistance={50}
-      />
+      {/* Camera controls - either OrbitControls or FPVControls based on mode */}
+      {cameraMode === "orbit" ? (
+        <OrbitControls
+          makeDefault
+          enablePan={true}
+          enableZoom={true}
+          enableRotate={true}
+          minDistance={5}
+          maxDistance={100}
+        />
+      ) : (
+        <FPVControls enabled={!isPlaying} />
+      )}
 
       {/* Render all bricks */}
       {bricks.map((brick, index) => {

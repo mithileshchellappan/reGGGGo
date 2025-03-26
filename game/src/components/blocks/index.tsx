@@ -37,6 +37,9 @@ export default function V0Blocks() {
   // Loading state
   const [loading, setLoading] = useState(true)
 
+  // Camera mode state
+  const [cameraMode, setCameraMode] = useState<"orbit" | "fpv">("orbit")
+
   // Preload textures to prevent lag when switching block types
   useEffect(() => {
     // Preload all special image textures
@@ -292,6 +295,12 @@ export default function V0Blocks() {
   const handleModeChange = useCallback((mode: "build" | "move" | "erase") => {
     setInteractionMode(mode)
   }, [])
+  
+  // Toggle camera mode
+  const toggleCameraMode = useCallback(() => {
+    setCameraMode(prev => prev === "orbit" ? "fpv" : "orbit")
+  }, [])
+  
   // Set up keyboard shortcuts
   useKeyboardShortcuts({
     isPlaying,
@@ -305,6 +314,7 @@ export default function V0Blocks() {
     onPlayToggle,
     currentTheme,
     handleThemeChange: handleThemeChange as (theme: string) => void,
+    toggleCameraMode,
   })
 
   return (
@@ -351,25 +361,33 @@ export default function V0Blocks() {
               selectedBlockType={selectedBlockType}
               selectedSpecialImage={selectedSpecialImage.id}
               isSpecialLocked={isSpecialLocked}
+              cameraMode={cameraMode}
             />
-            <OrbitControls
-              ref={orbitControlsRef}
-              target={[0, 0, 0]}
-              minPolarAngle={0}
-              maxPolarAngle={Math.PI / 2}
-              minDistance={10} // Minimum zoom distance
-              maxDistance={40} // Maximum zoom distance
-              autoRotate={isPlaying}
-              autoRotateSpeed={1}
-              enableZoom={!isPlaying}
-              enablePan={!isPlaying}
-              enableRotate={!isPlaying}
-            />
+            {cameraMode === "orbit" && (
+              <OrbitControls
+                ref={orbitControlsRef}
+                target={[0, 0, 0]}
+                minPolarAngle={0}
+                maxPolarAngle={Math.PI / 2}
+                minDistance={10} // Minimum zoom distance
+                maxDistance={100} // Maximum zoom distance - increased from 40 to 100
+                autoRotate={isPlaying}
+                autoRotateSpeed={1}
+                enableZoom={!isPlaying}
+                enablePan={!isPlaying}
+                enableRotate={!isPlaying}
+              />
+            )}
           </Canvas>
 
           {!isPlaying && (
             <>
-              <ActionToolbar onModeChange={handleModeChange} currentMode={interactionMode} />
+              <ActionToolbar 
+                onModeChange={handleModeChange} 
+                currentMode={interactionMode} 
+                cameraMode={cameraMode}
+                onCameraModeToggle={toggleCameraMode}
+              />
               <ColorSelector
                 colors={currentColors}
                 selectedColor={selectedColor}
@@ -392,6 +410,13 @@ export default function V0Blocks() {
                 userPurchases={userPurchases}
               />
               {isInCooldown && <CooldownIndicator remainingTime={cooldownRemaining} />}
+              
+              {/* FPV Instructions */}
+              {cameraMode === "fpv" && (
+                <div className="fixed top-4 left-1/2 transform -translate-x-1/2 bg-black/60 text-white px-4 py-2 rounded-lg text-sm z-30">
+                  Use WASD to move, QE for up/down, mouse to look around (V to toggle modes)
+                </div>
+              )}
             </>
           )}
           {isPlaying && (

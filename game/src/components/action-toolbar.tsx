@@ -2,15 +2,22 @@
 
 import type React from "react"
 import { useState, useEffect } from "react"
-import { Hammer, Eraser } from "lucide-react"
+import { Hammer, Eraser, Camera } from "lucide-react"
 import { SimpleTooltip } from "./simple-tooltip"
 
 interface ActionToolbarProps {
   onModeChange: (mode: "build" | "move" | "erase") => void
   currentMode: "build" | "move" | "erase"
+  cameraMode?: "orbit" | "fpv"
+  onCameraModeToggle?: () => void
 }
 
-export const ActionToolbar: React.FC<ActionToolbarProps> = ({ onModeChange, currentMode }) => {
+export const ActionToolbar: React.FC<ActionToolbarProps> = ({ 
+  onModeChange, 
+  currentMode,
+  cameraMode = "orbit",
+  onCameraModeToggle
+}) => {
   const [isMobile, setIsMobile] = useState(false)
 
   // Detect mobile device
@@ -63,6 +70,21 @@ export const ActionToolbar: React.FC<ActionToolbarProps> = ({ onModeChange, curr
           <Eraser className="w-5 h-5 stroke-[1.5]" />
         </button>
       </MaybeTooltip>
+
+      {onCameraModeToggle && (
+        <MaybeTooltip text="Toggle Camera Mode (v)">
+          <button
+            onClick={onCameraModeToggle}
+            className={`w-12 h-12 rounded-full flex items-center justify-center transition-colors ${
+              cameraMode === "fpv" ? "bg-black text-white" : "bg-black/30 text-white hover:bg-black/50"
+            }`}
+            aria-label={`Switch to ${cameraMode === "orbit" ? "FPV" : "Orbit"} Mode (V)`}
+            aria-pressed={cameraMode === "fpv"}
+          >
+            <Camera className="w-5 h-5 stroke-[1.5]" />
+          </button>
+        </MaybeTooltip>
+      )}
     </div>
   )
 }
