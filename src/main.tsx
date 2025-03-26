@@ -4,7 +4,7 @@ import type { DevvitMessage, WebViewMessage } from './message.js';
 import { addUser, deleteBrick, deleteUser, getCreation, getUsers, updateCreation, User } from './utils/gameUtils.js';
 import { regggoForm } from './form.js';
 import { ProductsList } from './store.js';
-import { setupPaymentHandler } from './paymentHandler.js';
+import { setupPaymentHandler } from './utils/paymentUtils.js';
 
 Devvit.configure({
   redditAPI: true,
@@ -171,6 +171,8 @@ Devvit.addCustomPostType({
             padding="medium"
             backgroundColor="rgba(0, 0, 0, 0.6)"
             cornerRadius="large"
+            alignment="middle center"
+            height="70%"
           >
             <hstack alignment="middle" width="100%">
               <text size="xlarge" weight="bold" color="#FFFFFF">Shop</text>
