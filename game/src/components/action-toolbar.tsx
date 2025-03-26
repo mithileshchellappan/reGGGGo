@@ -2,7 +2,7 @@
 
 import type React from "react"
 import { useState, useEffect } from "react"
-import { Hammer, Move, Eraser } from "lucide-react"
+import { Hammer, Eraser } from "lucide-react"
 import { SimpleTooltip } from "./simple-tooltip"
 
 interface ActionToolbarProps {
@@ -48,19 +48,6 @@ export const ActionToolbar: React.FC<ActionToolbarProps> = ({ onModeChange, curr
           aria-pressed={currentMode === "build"}
         >
           <Hammer className="w-5 h-5 stroke-[1.5]" />
-        </button>
-      </MaybeTooltip>
-
-      <MaybeTooltip text="Move (m)">
-        <button
-          onClick={() => onModeChange("move")}
-          className={`w-12 h-12 rounded-full flex items-center justify-center transition-colors ${
-            currentMode === "move" ? "bg-black text-white" : "bg-black/30 text-white hover:bg-black/50"
-          }`}
-          aria-label="Move Mode (M)"
-          aria-pressed={currentMode === "move"}
-        >
-          <Move className="w-5 h-5 stroke-[1.5]" />
         </button>
       </MaybeTooltip>
 

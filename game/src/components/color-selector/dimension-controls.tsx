@@ -85,7 +85,7 @@ export const DimensionControls: React.FC<DimensionControlsProps> = ({
 
   return (
     <div className="flex items-center gap-2">
-      <SimpleTooltip text="Width ([ smaller, ] bigger)" position="top">
+      <SimpleTooltip text="Width" position="top">
         <DropdownMenu>
           <DropdownMenuTrigger className="flex items-center justify-between bg-gray-700 border border-gray-600 rounded-md px-3 py-1 text-white font-medium text-sm min-w-[40px]">
             <span>{width}</span>
@@ -117,7 +117,7 @@ export const DimensionControls: React.FC<DimensionControlsProps> = ({
         </button>
       </SimpleTooltip>
 
-      <SimpleTooltip text="Depth (; smaller, ' bigger)" position="top">
+      <SimpleTooltip text="Depth" position="top">
         <DropdownMenu>
           <DropdownMenuTrigger className="flex items-center justify-between bg-gray-700 border border-gray-600 rounded-md px-3 py-1 text-white font-medium text-sm min-w-[40px]">
             <span>{height}</span>

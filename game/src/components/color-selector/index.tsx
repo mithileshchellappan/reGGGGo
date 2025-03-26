@@ -59,7 +59,6 @@ export const ColorSelector: React.FC<ExtendedColorSelectorProps> = ({
 
   return (
     <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2 flex flex-col gap-4 z-10">
-      {/* Main Controls Panel - Very rounded with smaller padding */}
       <div className="bg-gradient-to-b from-gray-800 to-gray-900 backdrop-blur-md px-6 py-3 rounded-[28px] shadow-lg border border-gray-700 text-white">
         <div className="flex items-center gap-3">
 
