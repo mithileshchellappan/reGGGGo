@@ -19,6 +19,7 @@ interface ExtendedColorSelectorProps extends ColorSelectorProps {
   onSelectSpecialImage: (url: string) => void
   isSpecialLocked: boolean
   onToggleSpecialLock: (locked: boolean) => void
+  userPurchases: { [key: string]: boolean }
 }
 
 export const ColorSelector: React.FC<ExtendedColorSelectorProps> = ({
@@ -41,6 +42,7 @@ export const ColorSelector: React.FC<ExtendedColorSelectorProps> = ({
   onSelectSpecialImage,
   isSpecialLocked,
   onToggleSpecialLock,
+  userPurchases,
 }) => {
   const [isMobile, setIsMobile] = useState(false)
 
@@ -83,6 +85,7 @@ export const ColorSelector: React.FC<ExtendedColorSelectorProps> = ({
               onSelectImage={onSelectSpecialImage}
               isLocked={isSpecialLocked}
               onToggleLock={onToggleSpecialLock}
+              userPurchases={userPurchases}
             />
           )}
 

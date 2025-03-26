@@ -43,38 +43,54 @@ export const MARBLE_TEXTURES = {
 }
 
 export type SpecialImage = {
-  id: AssetId;
+  id: string;
   color: string;
   roughness: string;
   normal: string;
 }
 
-// Function to generate texture paths for a given asset ID
-export function getTexturePathsForAsset(assetId: string) {
-  const basePath = `assets/textures/image-textures/${assetId}`;
-  return {
-    color: `${basePath}/color.png`,
-    roughness: `${basePath}/roughness.png`,
-    normal: `${basePath}/normal.png`,
-  };
-}
-
-// Available asset IDs
-export const AVAILABLE_ASSET_IDS = [
-  'sci-fi',
-  // 'brick',
-  // 'wood',
-  // 'metal',
-  // 'stone',
-  // 'grass',
-  // 'tile',
-  // 'water'
-] as const;
-
-export type AssetId = typeof AVAILABLE_ASSET_IDS[number];
-
 // Special images now only need IDs
-export const SPECIAL_IMAGES: SpecialImage[] = AVAILABLE_ASSET_IDS.map(id => ({
-  id,
-  ...getTexturePathsForAsset(id)
-}));
+export const SPECIAL_IMAGES: SpecialImage[]  = [
+  {
+    id: "moss",
+    color: "assets/textures/image-textures/moss/color.jpg",
+    roughness: "assets/textures/image-textures/moss/roughness.jpg",
+    normal: "assets/textures/image-textures/moss/normal.png",
+  },
+  {
+    id: "sci-fi",
+    color: "assets/textures/image-textures/sci-fi/color.png",
+    roughness: "assets/textures/image-textures/sci-fi/roughness.png",
+    normal: "assets/textures/image-textures/sci-fi/normal.png",
+  },
+  {
+    id: "tile",
+    color: "assets/textures/image-textures/tile/color.png",
+    roughness: "assets/textures/image-textures/tile/roughness.png",
+    normal: "assets/textures/image-textures/tile/normal.png",
+  },
+  {
+    id: 'wood',
+    color: "assets/textures/image-textures/wood/color.jpg",
+    roughness: "assets/textures/image-textures/wood/roughness.jpg",
+    normal: "assets/textures/image-textures/wood/normal.jpg",
+  },
+  {
+    id: 'metal',
+    color: "assets/textures/image-textures/metal/color.jpg",
+    roughness: "assets/textures/image-textures/metal/roughness.jpg",
+    normal: "assets/textures/image-textures/metal/normal.jpg",
+  },
+  {
+    id: 'gold',
+    color: "assets/textures/image-textures/gold/color.jpg",
+    roughness: "assets/textures/image-textures/gold/roughness.jpg",
+    normal: "assets/textures/image-textures/gold/normal.jpg",
+  },
+  {
+    id: 'leather',
+    color: "assets/textures/image-textures/leather/color.jpg",
+    roughness: "assets/textures/image-textures/leather/roughness.jpg",
+    normal: "assets/textures/image-textures/leather/normal.jpg",
+  }
+]

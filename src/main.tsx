@@ -4,7 +4,7 @@ import type { DevvitMessage, WebViewMessage } from './message.js';
 import { addUser, deleteBrick, deleteUser, getCreation, getUsers, updateCreation, User } from './utils/gameUtils.js';
 import { regggoForm } from './form.js';
 import { ProductsList } from './store.js';
-import { setupPaymentHandler } from './utils/paymentUtils.js';
+import { getUserPurchases, setupPaymentHandler } from './utils/paymentUtils.js';
 
 Devvit.configure({
   redditAPI: true,
@@ -43,6 +43,7 @@ Devvit.addCustomPostType({
     )
     const [creation, setCreation] = useState(async () => await getCreation(context))
     const [users, setUsers] = useState<User[]>(async () => await getUsers(context))
+    const [userPurchases, setUserPurchases] = useState(async () => await getUserPurchases(context))
     const [showStore, setShowStore] = useState(false)
 
     const webView = useWebView<WebViewMessage, DevvitMessage>({
@@ -61,6 +62,7 @@ Devvit.addCustomPostType({
               data: {
                 username: username,
                 creation,
+                userPurchases: userPurchases?.purchases ?? {}
               },
             });
             break;

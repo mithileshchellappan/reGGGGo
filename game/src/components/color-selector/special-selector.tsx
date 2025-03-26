@@ -14,6 +14,7 @@ interface SpecialSelectorProps {
   selectedImage: string
   isLocked: boolean
   onToggleLock: (locked: boolean) => void
+  userPurchases: { [key: string]: boolean }
 }
 
 export const SpecialSelector: React.FC<SpecialSelectorProps> = ({
@@ -21,6 +22,7 @@ export const SpecialSelector: React.FC<SpecialSelectorProps> = ({
   selectedImage,
   isLocked,
   onToggleLock,
+  userPurchases,
 }) => {
   const [isOpen, setIsOpen] = useState(false)
   
@@ -51,6 +53,7 @@ export const SpecialSelector: React.FC<SpecialSelectorProps> = ({
             <div className="grid grid-cols-4 gap-2">
               {SPECIAL_IMAGES.map((image) => (
                 <button
+                  disabled={!userPurchases[image.id]}
                   key={image.id}
                   className={`w-14 h-14 rounded-md overflow-hidden border-2 transition-all ${
                     selectedImage === image.id ? "border-primary" : "border-transparent hover:border-gray-300"

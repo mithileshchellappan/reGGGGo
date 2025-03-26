@@ -52,7 +52,6 @@ export default function V0Blocks() {
       ...Object.values(TEXTURES)
     ]
     
-    console.log("Preloading textures:", textureUrls);
     
     // Use preload method via THREE.TextureLoader
     const loader = new THREE.TextureLoader();
@@ -63,7 +62,6 @@ export default function V0Blocks() {
         loader.load(
           url, 
           (texture) => {
-            console.log(`Successfully loaded texture: ${url}`);
             resolve(texture);
           },
           undefined,
@@ -89,6 +87,7 @@ export default function V0Blocks() {
   const [depth, setDepth] = useState(2)
   const [isPlaying, setIsPlaying] = useState(false)
   const [interactionMode, setInteractionMode] = useState<"build" | "move" | "erase">("build")
+  const [userPurchases, setUserPurchases] = useState<{ [key: string]: boolean }>({})
   const orbitControlsRef = useRef<any>(null)
   
   // Special block state
@@ -117,14 +116,12 @@ export default function V0Blocks() {
 
       switch (message.type) {
         case MessageType.INITIAL_DATA:
-          
           const initialBricks = message.data.creation.bricks;
           setBricks(initialBricks);
+          setUserPurchases({...message.data.userPurchases, moss: true});
           console.log("Initial bricks:", initialBricks)
           setUsername(message.data.username);
-          
           updateGridSize(message.data.creation.canvasSize)
-
           setLoading(false);
           break;
 
@@ -392,6 +389,7 @@ export default function V0Blocks() {
                 onSelectSpecialImage={handleSelectSpecialImage}
                 isSpecialLocked={isSpecialLocked}
                 onToggleSpecialLock={setIsSpecialLocked}
+                userPurchases={userPurchases}
               />
               {isInCooldown && <CooldownIndicator remainingTime={cooldownRemaining} />}
             </>

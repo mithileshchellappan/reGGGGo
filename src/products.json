@@ -1,29 +1,17 @@
 {
   "products": [
     {
-      "sku": "moss",
-      "displayName": "Moss",
-      "description": "A green moss block",
-      "price": 5,
+      "sku": "sci-fi",
+      "displayName": "Sci-Fi",
+      "description": "A sci-fi block",
+      "price": 500,
       "accountingType": "DURABLE",
       "images": {
-        "icon": "image-textures/moss.png"
+        "icon": "image-textures/sci-fi.png"
       },
       "metadata": {
         "type": "texture",
-        "category": "nature"
-      }
-    },
-    {
-      "sku": "brick",
-      "displayName": "Brick",
-      "description": "Classic brick block",
-      "price": 5,
-      "accountingType": "DURABLE",
-
-      "metadata": {
-        "type": "texture",
-        "category": "construction"
+        "category": "sci-fi"
       }
     },
     {
@@ -51,23 +39,13 @@
       }
     },
     {
-      "sku": "stone",
-      "displayName": "Stone",
-      "description": "Stone block",
-      "price": 25,
-      "accountingType": "DURABLE",
-
-      "metadata": {
-        "type": "texture",
-        "category": "construction"
-      }
-    },
-    {
       "sku": "tile",
       "displayName": "Tile",
       "price": 25,
       "accountingType": "DURABLE",
-
+      "images": {
+        "icon": "image-textures/tile.png"
+      },
       "metadata": {
         "type": "texture",
         "category": "premium"
@@ -77,7 +55,7 @@
       "sku": "gold",
       "displayName": "Gold",
       "description": "Luxury gold block",
-      "price": 100,
+      "price": 150,
       "accountingType": "DURABLE",
 
       "metadata": {
@@ -86,10 +64,10 @@
       }
     },
     {
-      "sku": "diamond",
-      "displayName": "Diamond",
-      "description": "Premium diamond block",
-      "price": 150,
+      "sku": "leather",
+      "displayName": "Leather",
+      "description": "Premium leather block",
+      "price": 100,
       "accountingType": "DURABLE",
 
       "metadata": {

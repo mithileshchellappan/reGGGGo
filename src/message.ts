@@ -11,7 +11,7 @@ export type WebViewMessage =
   | { type: 'brickDeleted'; data: { brick: Brick; index: number } }
 
 export type DevvitMessage =
-  | { type: 'initialData'; data: { username: string; creation: { bricks: Brick[]; creationId: string } } } 
+  | { type: 'initialData'; data: { username: string; creation: { bricks: Brick[]; creationId: string},  userPurchases: { [key: string]: boolean }  } } 
   | { type: 'channelBrickAdded'; data: { brick: Brick; fromChannel: boolean } }
   | { type: 'channelBrickDeleted'; data: { index: number; brick: Brick; brickId: string; fromChannel: boolean } }
 
