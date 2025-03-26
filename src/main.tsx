@@ -209,7 +209,7 @@ Devvit.addCustomPostType({
                   </hstack>
                   <spacer size="large" />
                   <hstack gap="small">
-                    <button onPress={onShopPress} appearance="bordered">
+                    <button onPress={onShopPress} appearance="secondary">
                       🛒 Shop
                     </button>
                     <button onPress={onMountPress} appearance="primary">

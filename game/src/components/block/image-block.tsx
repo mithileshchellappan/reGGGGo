@@ -64,8 +64,15 @@ export const ImageBlock: React.FC<BlockProps> = ({
     };
   }, [specialImage]);
   
-  console.log("Loading textures:", textureProps);
   const textures = useTexture(textureProps);
+
+  // Get custom material values from the special image
+  const materialValues = useMemo(() => {
+    return {
+      roughness: specialImage?.roughnessValue !== undefined ? specialImage.roughnessValue : 0.7,
+      metalness: specialImage?.metalnessValue !== undefined ? specialImage.metalnessValue : 0.3
+    };
+  }, [specialImage]);
 
   // Set up refs and state
   const brickRef = useRef<THREE.Mesh>(null)
@@ -102,8 +109,8 @@ export const ImageBlock: React.FC<BlockProps> = ({
         roughnessMap: textures.roughness,
         normalMap: textures.normal,
         color: "#FFFFFF", // Use white instead of darkenedColor to show texture color
-        roughness: 0.7,
-        metalness: 0.3,
+        roughness: materialValues.roughness,
+        metalness: materialValues.metalness,
         emissive: isPlacing ? (isEraseHighlight ? "#ff0000" : "#ffff00") : "#000000",
         emissiveIntensity: isPlacing ? 1 : 0,
         transparent: true,
@@ -116,8 +123,8 @@ export const ImageBlock: React.FC<BlockProps> = ({
         roughnessMap: textures.roughness,
         normalMap: textures.normal,
         color: "#FFFFFF", // Use white instead of darkenedColor
-        roughness: 0.7,
-        metalness: 0.3,
+        roughness: materialValues.roughness,
+        metalness: materialValues.metalness,
         emissive: isPlacing ? (isEraseHighlight ? "#ff0000" : "#ffff00") : "#000000",
         emissiveIntensity: isPlacing ? 1 : 0,
         transparent: true,
@@ -126,12 +133,12 @@ export const ImageBlock: React.FC<BlockProps> = ({
       }),
       // Top side
       new THREE.MeshStandardMaterial({
-        color: darkenedColor, // Keep color for top side (studs area)
+        map: textures.color,
         roughnessMap: textures.roughness,
         normalMap: textures.normal,
-        map: textures.color,
-        roughness: 0.7,
-        metalness: 0.3,
+        color: "#FFFFFF", // Changed from darkenedColor to show texture's true color
+        roughness: materialValues.roughness,
+        metalness: materialValues.metalness,
         emissive: isPlacing ? (isEraseHighlight ? "#ff0000" : "#ffff00") : "#000000",
         emissiveIntensity: isPlacing ? 1 : 0,
         transparent: opacity < 1,
@@ -143,8 +150,8 @@ export const ImageBlock: React.FC<BlockProps> = ({
         roughnessMap: textures.roughness,
         normalMap: textures.normal,
         map: textures.color,
-        roughness: 0.7,
-        metalness: 0.3,
+        roughness: materialValues.roughness,
+        metalness: materialValues.metalness,
         emissive: isPlacing ? (isEraseHighlight ? "#ff0000" : "#ffff00") : "#000000",
         emissiveIntensity: isPlacing ? 1 : 0,
         transparent: opacity < 1,
@@ -156,8 +163,8 @@ export const ImageBlock: React.FC<BlockProps> = ({
         roughnessMap: textures.roughness,
         normalMap: textures.normal,
         color: "#FFFFFF", // Use white instead of darkenedColor
-        roughness: 0.7,
-        metalness: 0.3,
+        roughness: materialValues.roughness,
+        metalness: materialValues.metalness,
         emissive: isPlacing ? (isEraseHighlight ? "#ff0000" : "#ffff00") : "#000000",
         emissiveIntensity: isPlacing ? 1 : 0,
         transparent: true,
@@ -170,8 +177,8 @@ export const ImageBlock: React.FC<BlockProps> = ({
         roughnessMap: textures.roughness,
         normalMap: textures.normal,
         color: "#FFFFFF", // Use white instead of darkenedColor
-        roughness: 0.7,
-        metalness: 0.3,
+        roughness: materialValues.roughness,
+        metalness: materialValues.metalness,
         emissive: isPlacing ? (isEraseHighlight ? "#ff0000" : "#ffff00") : "#000000",
         emissiveIntensity: isPlacing ? 1 : 0,
         transparent: true,
@@ -179,21 +186,21 @@ export const ImageBlock: React.FC<BlockProps> = ({
         alphaTest: 0.1,
       }),
     ];
-  }, [textures, darkenedColor, isPlacing, isEraseHighlight, opacity])
+  }, [textures, darkenedColor, isPlacing, isEraseHighlight, opacity, materialValues])
 
   // Create a memoized stud material
   const studMaterial = useMemo(() => new THREE.MeshStandardMaterial({
-    color: darkenedColor,
+    color: "#FFFFFF", // Changed from darkenedColor to show texture's true color
     roughnessMap: textures.roughness,
     normalMap: textures.normal,
     map: textures.color,
-    roughness: 0.7,
-    metalness: 0.3,
+    roughness: materialValues.roughness,
+    metalness: materialValues.metalness,
     emissive: isPlacing ? (isEraseHighlight ? "#ff0000" : "#ffff00") : "#000000",
     emissiveIntensity: isPlacing ? 1 : 0,
     transparent: opacity < 1,
     opacity: opacity,
-  }), [darkenedColor, textures, isPlacing, isEraseHighlight, opacity])
+  }), [darkenedColor, textures, isPlacing, isEraseHighlight, opacity, materialValues])
 
   // Update materials on animation frame
   useFrame((state) => {

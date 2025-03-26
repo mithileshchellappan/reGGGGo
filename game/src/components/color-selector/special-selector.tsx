@@ -55,7 +55,7 @@ export const SpecialSelector: React.FC<SpecialSelectorProps> = ({
                 <button
                   disabled={!userPurchases[image.id]}
                   key={image.id}
-                  className={`w-14 h-14 rounded-md overflow-hidden border-2 transition-all ${
+                  className={`w-14 h-14 rounded-md overflow-hidden border-2 transition-all relative ${
                     selectedImage === image.id ? "border-primary" : "border-transparent hover:border-gray-300"
                   }`}
                   style={{
@@ -67,7 +67,13 @@ export const SpecialSelector: React.FC<SpecialSelectorProps> = ({
                     onSelectImage(image.id)
                     setIsOpen(false)
                   }}
-                />
+                >
+                  {!userPurchases[image.id] && (
+                    <div className="absolute top-0 left-0 bg-black/50 p-1 rounded-br">
+                      <Lock className="w-3 h-3 text-white" />
+                    </div>
+                  )}
+                </button>
               ))}
             </div>
           </div>

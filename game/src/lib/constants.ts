@@ -47,6 +47,8 @@ export type SpecialImage = {
   color: string;
   roughness: string;
   normal: string;
+  roughnessValue?: number;  // Custom roughness value
+  metalnessValue?: number;  // Custom metalness value
 }
 
 // Special images now only need IDs
@@ -56,41 +58,55 @@ export const SPECIAL_IMAGES: SpecialImage[]  = [
     color: "assets/textures/image-textures/moss/color.jpg",
     roughness: "assets/textures/image-textures/moss/roughness.jpg",
     normal: "assets/textures/image-textures/moss/normal.png",
+    roughnessValue: 0.8,
+    metalnessValue: 0.1
   },
   {
     id: "sci-fi",
     color: "assets/textures/image-textures/sci-fi/color.png",
     roughness: "assets/textures/image-textures/sci-fi/roughness.png",
     normal: "assets/textures/image-textures/sci-fi/normal.png",
+    roughnessValue: 0.5,
+    metalnessValue: 0.6
   },
   {
     id: "tile",
     color: "assets/textures/image-textures/tile/color.png",
     roughness: "assets/textures/image-textures/tile/roughness.png",
     normal: "assets/textures/image-textures/tile/normal.png",
+    roughnessValue: 0.4,
+    metalnessValue: 0.2
   },
   {
     id: 'wood',
     color: "assets/textures/image-textures/wood/color.jpg",
     roughness: "assets/textures/image-textures/wood/roughness.jpg",
     normal: "assets/textures/image-textures/wood/normal.jpg",
+    roughnessValue: 0.9,
+    metalnessValue: 0.1
   },
   {
     id: 'metal',
     color: "assets/textures/image-textures/metal/color.jpg",
     roughness: "assets/textures/image-textures/metal/roughness.jpg",
     normal: "assets/textures/image-textures/metal/normal.jpg",
+    roughnessValue: 0.3,
+    metalnessValue: 0.8
   },
   {
     id: 'gold',
     color: "assets/textures/image-textures/gold/color.jpg",
     roughness: "assets/textures/image-textures/gold/roughness.jpg",
     normal: "assets/textures/image-textures/gold/normal.jpg",
+    roughnessValue: 0.2,
+    metalnessValue: 0.9
   },
   {
     id: 'leather',
     color: "assets/textures/image-textures/leather/color.jpg",
     roughness: "assets/textures/image-textures/leather/roughness.jpg",
     normal: "assets/textures/image-textures/leather/normal.jpg",
+    roughnessValue: 0.7,
+    metalnessValue: 0.1
   }
 ]

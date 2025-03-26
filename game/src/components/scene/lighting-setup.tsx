@@ -24,14 +24,14 @@ export const LightingSetup: React.FC = () => {
 
   return (
     <>
-      {/* Reduced ambient light intensity for better shadows */}
-      <ambientLight intensity={0.3} />
+      {/* Higher ambient light for more even illumination */}
+      <ambientLight intensity={0.6} />
 
-      {/* Main directional light with improved shadow settings */}
+      {/* Main directional light - softer */}
       <directionalLight
         ref={directionalLightRef}
         position={[10, 12, 8]}
-        intensity={0.8}
+        intensity={0.25}
         castShadow
         shadow-mapSize={[2048, 2048]}
         shadow-camera-far={50}
@@ -42,8 +42,22 @@ export const LightingSetup: React.FC = () => {
         shadow-bias={-0.0001}
       />
 
-      {/* Secondary fill light from opposite direction */}
-      <directionalLight position={[-8, 5, -8]} intensity={0.3} castShadow={false} />
+      {/* Multiple soft fill lights positioned around for Apple store effect */}
+      <directionalLight position={[-8, 5, -8]} intensity={0.2} castShadow={false} />
+      <directionalLight position={[8, 6, -8]} intensity={0.2} castShadow={false} />
+      <directionalLight position={[-8, 6, 8]} intensity={0.2} castShadow={false} />
+      
+      {/* Bottom fill light for subtle upward illumination */}
+      <directionalLight position={[0, -5, 0]} intensity={0.1} castShadow={false} />
+      
+      {/* Add point lights around the scene for more even lighting */}
+      <pointLight position={[10, 10, 10]} intensity={0.15} distance={30} decay={2} />
+      <pointLight position={[-10, 10, -10]} intensity={0.15} distance={30} decay={2} />
+      <pointLight position={[10, 10, -10]} intensity={0.15} distance={30} decay={2} />
+      <pointLight position={[-10, 10, 10]} intensity={0.15} distance={30} decay={2} />
+      
+      {/* Add a hemisphere light for natural ambient effect */}
+      <hemisphereLight args={["#ffffff", "#f0f0ff", 0.3]} />
     </>
   )
 }
