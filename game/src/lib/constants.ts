@@ -103,9 +103,9 @@ export const SPECIAL_IMAGES: SpecialImage[]  = [
   },
   {
     id: 'leather',
-    color: "assets/textures/image-textures/leather/color.jpg",
-    roughness: "assets/textures/image-textures/leather/roughness.jpg",
-    normal: "assets/textures/image-textures/leather/normal.jpg",
+    color: "assets/textures/image-textures/leather/color.png",
+    roughness: "assets/textures/image-textures/leather/roughness.png",
+    normal: "assets/textures/image-textures/leather/normal.png",
     roughnessValue: 0.7,
     metalnessValue: 0.1
   }

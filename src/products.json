@@ -20,7 +20,9 @@
       "description": "Wooden block",
       "price": 5,
       "accountingType": "DURABLE",
-
+      "images": {
+        "icon": "image-textures/wood.png"
+      },
       "metadata": {
         "type": "texture",
         "category": "nature"
@@ -32,7 +34,9 @@
       "description": "Metallic block",
       "price": 50,
       "accountingType": "DURABLE",
-
+      "images": {
+        "icon": "image-textures/metal.png"
+      },
       "metadata": {
         "type": "texture",
         "category": "premium"
@@ -57,7 +61,9 @@
       "description": "Luxury gold block",
       "price": 150,
       "accountingType": "DURABLE",
-
+      "images": {
+        "icon": "image-textures/gold.png"
+      },
       "metadata": {
         "type": "texture",
         "category": "luxury"
@@ -69,7 +75,9 @@
       "description": "Premium leather block",
       "price": 100,
       "accountingType": "DURABLE",
-
+      "images": {
+        "icon": "image-textures/leather.png"
+      },
       "metadata": {
         "type": "texture",
         "category": "luxury"

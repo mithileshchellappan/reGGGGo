@@ -4,6 +4,7 @@ import { useRef, useState } from "react"
 import { useFrame } from "@react-three/fiber"
 import { Block } from "../block"
 import * as THREE from "three"
+import { ImageBlock } from "../block/image-block"
 
 export const LoadingBrick = () => {
   const [rotationY, setRotationY] = useState(0)
@@ -27,12 +28,13 @@ export const LoadingBrick = () => {
         Math.cos(rotationY * 0.5) * 0.15
       ]}
     >
-      <Block 
+      <ImageBlock
         color={"#FF3333"}
         position={[0, positionY, 0]}
         width={2}
         height={2}
         isPlacing={false} 
+        imageId="sci-fi"
       />
     </group>
   )
