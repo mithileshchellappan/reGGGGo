@@ -9,7 +9,7 @@ export interface BlockProps {
   username?: string
   onClick?: () => void
   isInCooldown?: boolean
-  imageUrl?: string
+  imageId?: string
   isLocked?: boolean
 }
 

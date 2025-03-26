@@ -42,37 +42,39 @@ export const MARBLE_TEXTURES = {
   color: "assets/textures/marble_color.jpg",
 }
 
-export const SPECIAL_IMAGES = [
-  {
-    id: "moss",
-    imageUrl: "/assets/image-textures/moss.jpg",
-  },
-  // {
-  //   id: "brick",
-  //   imageUrl: "/assets/image-textures/brick.jpg",
-  // },
-  // {
-  //   id: "wood",
-  //   imageUrl: "/assets/image-textures/wood.jpg",
-  // },
-  // {
-  //   id: "metal",
-  //   imageUrl: "/assets/image-textures/metal.jpg",
-  // },
-  // {
-  //   id: "stone",
-  //   imageUrl: "/assets/image-textures/stone.jpg",
-  // },
-  // {
-  //   id: "grass",
-  //   imageUrl: "/assets/image-textures/grass.jpg",
-  // },
-  // {
-  //   id: "tile",
-  //   imageUrl: "/assets/image-textures/tile.jpg",
-  // },
-  // {
-  //   id: "water",
-  //   imageUrl: "/assets/image-textures/water.jpg",
-  // }
-]
+export type SpecialImage = {
+  id: AssetId;
+  color: string;
+  roughness: string;
+  normal: string;
+}
+
+// Function to generate texture paths for a given asset ID
+export function getTexturePathsForAsset(assetId: string) {
+  const basePath = `assets/textures/image-textures/${assetId}`;
+  return {
+    color: `${basePath}/color.png`,
+    roughness: `${basePath}/roughness.png`,
+    normal: `${basePath}/normal.png`,
+  };
+}
+
+// Available asset IDs
+export const AVAILABLE_ASSET_IDS = [
+  'sci-fi',
+  // 'brick',
+  // 'wood',
+  // 'metal',
+  // 'stone',
+  // 'grass',
+  // 'tile',
+  // 'water'
+] as const;
+
+export type AssetId = typeof AVAILABLE_ASSET_IDS[number];
+
+// Special images now only need IDs
+export const SPECIAL_IMAGES: SpecialImage[] = AVAILABLE_ASSET_IDS.map(id => ({
+  id,
+  ...getTexturePathsForAsset(id)
+}));

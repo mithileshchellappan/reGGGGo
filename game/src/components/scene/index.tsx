@@ -84,8 +84,7 @@ export const Scene: React.FC<ExtendedSceneProps> = ({
         // Check for blockType property
         const blockType = brick.blockType || "regular"
 
-        // If it's special and has imageUrl, use ImageBlock, otherwise use regular Block
-        if (blockType === "special" && brick.imageUrl) {
+        if (blockType === "special" && brick.imageId) {
           return (
             <ImageBlock
               key={index}
@@ -96,7 +95,7 @@ export const Scene: React.FC<ExtendedSceneProps> = ({
               username={brick.username}
               isPlacing={isHovered}
               onClick={() => handleBrickClick(brick, index)}
-              imageUrl={brick.imageUrl}
+              imageId={brick.imageId}
             />
           )
         } else {

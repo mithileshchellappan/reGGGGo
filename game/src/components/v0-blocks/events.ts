@@ -11,7 +11,7 @@ export type Brick = {
   width: number
   height: number
   username?: string
-  imageUrl?: string
+  imageId?: string
   blockType?: BlockType
   isLocked?: boolean
 }

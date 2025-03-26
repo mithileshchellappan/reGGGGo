@@ -27,7 +27,7 @@ export const BuildMode: React.FC<BuildModeProps> = ({
   width,
   depth,
   selectedBlockType,
-  selectedSpecialImage = SPECIAL_IMAGES[0].imageUrl,
+  selectedSpecialImage = SPECIAL_IMAGES[0].id,
   isSpecialLocked = false,
 }) => {
   if (!showNewBrick) return null
@@ -43,7 +43,7 @@ export const BuildMode: React.FC<BuildModeProps> = ({
           height={depth}
           isPlacing={true}
           opacity={0.6}
-          imageUrl={selectedSpecialImage}
+          imageId={selectedSpecialImage}
           isLocked={isSpecialLocked}
         />
       )

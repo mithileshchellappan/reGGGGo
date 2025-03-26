@@ -14,7 +14,7 @@ import { useTouchHandling } from "./use-touch-handling"
 import { useCooldown } from "./use-cooldown"
 import { CooldownIndicator } from "../cooldown-indicator"
 import { LoadingBrick } from "./loading-brick"
-import { DEFAULT_TIMER_DURATION, GRID_SIZE, MAX_GRID_SIZE, updateGridSize } from "../../lib/constants"
+import { DEFAULT_TIMER_DURATION, GRID_SIZE, MAX_GRID_SIZE, SpecialImage, updateGridSize } from "../../lib/constants"
 import { sendMessage, onMessage, MessageType } from "../../lib/real-time"
 import type { Brick } from "./events"
 import type { BlockType } from "../../components/block/types"
@@ -25,6 +25,9 @@ import {
   handleClearSet,
   handlePlayToggle,
 } from "./events"
+import { useTexture } from "@react-three/drei"
+import { SPECIAL_IMAGES, TEXTURES } from "../../lib/constants"
+import * as THREE from "three"
 
 export default function V0Blocks() {
   // Theme and colors
@@ -33,6 +36,51 @@ export default function V0Blocks() {
 
   // Loading state
   const [loading, setLoading] = useState(true)
+
+  // Preload textures to prevent lag when switching block types
+  useEffect(() => {
+    // Preload all special image textures
+    const textureUrls = [
+      // Collect all texture paths from special images
+      ...SPECIAL_IMAGES.flatMap(img => {
+        const paths = [];
+        if (img.color) paths.push(img.color);
+        if (img.roughness) paths.push(img.roughness);
+        if (img.normal) paths.push(img.normal);
+        return paths;
+      }),
+      ...Object.values(TEXTURES)
+    ]
+    
+    console.log("Preloading textures:", textureUrls);
+    
+    // Use preload method via THREE.TextureLoader
+    const loader = new THREE.TextureLoader();
+    
+    // Create a promise for each texture load
+    const loadPromises = textureUrls.map(url => 
+      new Promise((resolve, reject) => {
+        loader.load(
+          url, 
+          (texture) => {
+            console.log(`Successfully loaded texture: ${url}`);
+            resolve(texture);
+          },
+          undefined,
+          (error) => {
+            console.error(`Failed to load texture: ${url}`, error);
+            reject(error);
+          }
+        );
+      })
+    );
+    
+    // Wait for all textures to load
+    Promise.all(loadPromises)
+      .then(() => console.log("All textures preloaded successfully"))
+      .catch(error => console.error("Error preloading textures:", error));
+      
+  }, [])
 
   // State
   const [bricks, setBricks] = useState<Brick[]>([])
@@ -45,7 +93,7 @@ export default function V0Blocks() {
   
   // Special block state
   const [selectedBlockType, setSelectedBlockType] = useState<BlockType>("regular")
-  const [selectedSpecialImage, setSelectedSpecialImage] = useState<string>("/assets/image-textures/moss.jpg")
+  const [selectedSpecialImage, setSelectedSpecialImage] = useState<SpecialImage>(SPECIAL_IMAGES[0])
   const [isSpecialLocked, setIsSpecialLocked] = useState<boolean>(false)
 
   // Modal state
@@ -155,6 +203,16 @@ export default function V0Blocks() {
     };
   }, []) // Empty dependency array since we're using functional updates
 
+  // Handler for selecting special images by ID
+  const handleSelectSpecialImage = useCallback((imageId: string) => {
+    const image = SPECIAL_IMAGES.find(img => img.id === imageId);
+    if (image) {
+      setSelectedSpecialImage(image);
+    } else {
+      console.error(`Image with ID ${imageId} not found`);
+    }
+  }, []);
+
   // Wrapper functions that call the imported event handlers with the current state
   const onAddBrick = useCallback(
     (brick: Brick) => {
@@ -167,7 +225,7 @@ export default function V0Blocks() {
         blockType: selectedBlockType,
         ...(selectedBlockType === "special" && selectedSpecialImage
           ? {
-              imageUrl: selectedSpecialImage,
+              imageId: selectedSpecialImage.id,
               isLocked: isSpecialLocked,
             }
           : {}),
@@ -294,7 +352,7 @@ export default function V0Blocks() {
               isInCooldown={isInCooldown}
               totalTime={totalTime}
               selectedBlockType={selectedBlockType}
-              selectedSpecialImage={selectedSpecialImage}
+              selectedSpecialImage={selectedSpecialImage.id}
               isSpecialLocked={isSpecialLocked}
             />
             <OrbitControls
@@ -330,8 +388,8 @@ export default function V0Blocks() {
                 bricksCount={bricks.length}
                 selectedBlockType={selectedBlockType}
                 onSelectBlockType={setSelectedBlockType}
-                selectedSpecialImage={selectedSpecialImage}
-                onSelectSpecialImage={setSelectedSpecialImage}
+                selectedSpecialImage={selectedSpecialImage.id}
+                onSelectSpecialImage={handleSelectSpecialImage}
                 isSpecialLocked={isSpecialLocked}
                 onToggleSpecialLock={setIsSpecialLocked}
               />
