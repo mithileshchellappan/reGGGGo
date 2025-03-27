@@ -34,8 +34,6 @@ export const Scene: React.FC<ExtendedSceneProps> = ({
   isPlaying,
   interactionMode = "build",
   isInCooldown = false,
-  timeRemaining = 0,
-  totalTime = 0,
   selectedBlockType,
   selectedSpecialImage,
   isSpecialLocked,
@@ -138,11 +136,6 @@ export const Scene: React.FC<ExtendedSceneProps> = ({
       )}
 
       {interactionMode === "erase" && !isPlaying && <EraseMode />}
-
-      {/* Clock animation */}
-      {false && timeRemaining > 0 && (
-        <ClockAnimation timeRemaining={timeRemaining} totalTime={totalTime} position={[0, 15, -GRID_SIZE / 2 - 5]} />
-      )}
 
       {/* The plane is always present but only interactive when not playing and in build mode */}
       <mesh

@@ -11,7 +11,5 @@ export interface SceneProps {
   isPlaying: boolean
   interactionMode?: "build" | "move" | "erase"
   isInCooldown?: boolean
-  timeRemaining?: number
-  totalTime?: number
 }
 

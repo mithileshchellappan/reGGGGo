@@ -2,7 +2,7 @@
 
 import type React from "react"
 
-import { useEffect, useState } from "react"
+import { useEffect, useState, useRef } from "react"
 
 interface CooldownIndicatorProps {
   remainingTime: number
@@ -10,6 +10,10 @@ interface CooldownIndicatorProps {
 
 export const CooldownIndicator: React.FC<CooldownIndicatorProps> = ({ remainingTime }) => {
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 })
+  const [displayTime, setDisplayTime] = useState(remainingTime)
+  const startTimeRef = useRef<number>(Date.now())
+  const initialTimeRef = useRef<number>(remainingTime)
+  const animationFrameRef = useRef<number | null>(null)
 
   // Track mouse position
   useEffect(() => {
@@ -24,8 +28,31 @@ export const CooldownIndicator: React.FC<CooldownIndicatorProps> = ({ remainingT
     }
   }, [])
 
-  // Format the remaining time
-  const formattedTime = (remainingTime / 1000).toFixed(1)
+  // Handle countdown timer
+  useEffect(() => {
+    // Reset timer when remainingTime prop changes
+    initialTimeRef.current = remainingTime
+    startTimeRef.current = Date.now()
+    setDisplayTime(remainingTime)
+    
+    const updateTimer = () => {
+      const elapsed = Date.now() - startTimeRef.current
+      const newRemainingTime = Math.max(0, initialTimeRef.current - elapsed)
+      setDisplayTime(newRemainingTime)
+      
+      if (newRemainingTime > 0) {
+        animationFrameRef.current = requestAnimationFrame(updateTimer)
+      }
+    }
+    
+    animationFrameRef.current = requestAnimationFrame(updateTimer)
+    
+    return () => {
+      if (animationFrameRef.current) {
+        cancelAnimationFrame(animationFrameRef.current)
+      }
+    }
+  }, [remainingTime])
 
   return (
     <div
@@ -37,7 +64,7 @@ export const CooldownIndicator: React.FC<CooldownIndicatorProps> = ({ remainingT
       }}
     >
       <div className="bg-black/80 text-white px-3 py-1 rounded-full text-sm font-medium animate-pulse">
-        {formattedTime}s
+        {(displayTime / 1000).toFixed(1)}s
       </div>
     </div>
   )

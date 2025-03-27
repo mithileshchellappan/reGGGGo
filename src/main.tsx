@@ -1,7 +1,7 @@
 import { Devvit, useAsync, useChannel, useState, useWebView } from '@devvit/public-api';
-import type { Comment, Context } from '@devvit/public-api';
+import type { Comment } from '@devvit/public-api';
 import type { DevvitMessage, WebViewMessage, } from './message.js';
-import { addUser, deleteBrick, deleteUser, getCreation, getUsers, updateCreation, User } from './utils/gameUtils.js';
+import { addUser,  deleteBrick, deleteUser, getCreation, getUsers, updateCreation, User } from './utils/gameUtils.js';
 import { regggoForm } from './form.js';
 import { ProductsList } from './store.js';
 import { getUserPurchases, setupPaymentHandler } from './utils/paymentUtils.js';
@@ -24,7 +24,7 @@ Devvit.configure({
 setupPaymentHandler();
 
 Devvit.addMenuItem({
-  label: 'Launch a reGGGGoß Builder',
+  label: '[reGGGGo]Launch a Builder',
   location: 'subreddit',
   onPress: async (event, context) => {
     const { ui } = context;
@@ -55,10 +55,10 @@ Devvit.addCustomPostType({
     const [userPurchases, setUserPurchases] = useState(async () => await getUserPurchases(context))
     const [showStore, setShowStore] = useState(false)
 
+
     // Get the top comment
     const { data: commentData, loading, error } = useAsync(async () => {
       if (!context.postId) return null;
-      
       try {
         const comments = await context.reddit
           .getComments({
@@ -216,12 +216,12 @@ Devvit.addCustomPostType({
             padding="medium"
             backgroundColor="rgba(0, 0, 0, 0.6)"
             cornerRadius="large"
-            alignment="middle center"
-            height="70%"
+            alignment="top center"
+            height="55%"
           >
             <hstack alignment="middle" width="100%">
-              <text size="xlarge" weight="bold" color="#FFFFFF">Shop</text>
-              <spacer />
+              <text size="large" weight="bold" color="#FFFFFF">🛒 Shop</text>
+              <spacer size="large" />
               <button onPress={() => setShowStore(false)} appearance="bordered">Close</button>
             </hstack>
             <spacer size="medium" />
@@ -266,7 +266,7 @@ Devvit.addCustomPostType({
                 {error && <text color="red">Error loading comment: {error.message}</text>}
                 {topComment && isComment(topComment) && (
                   <vstack padding="small" cornerRadius="medium" backgroundColor="rgba(0, 0, 0, 0.8)">
-                    <text size="large" color="#108be8">Top Strategy:</text>
+                    <text size="medium" color="#108be8">Top Strategy:</text>
                     <spacer size="small" />
                     <text style="body" wrap>{topComment.body.slice(0, 250)}{topComment.body.length > 250 ? '...' : ''}</text>
                     <hstack>
@@ -284,18 +284,12 @@ Devvit.addCustomPostType({
                 <hstack gap="small">
                   {users && users.length > 0 && users.slice(0, 5).map((user) => (
                     <vstack alignment="center" gap="small">
-                      <image url={user.snoovatarUrl} imageWidth={50} imageHeight={50} />
-                      <text size="xsmall" color="#FFFFFF">{user.username}</text>
+                      <image description={user.username} url={user.snoovatarUrl} imageWidth={50} imageHeight={50} />
+                      {/* <text size="xsmall" color="#FFFFFF">{user.username}</text> */}
                     </vstack>
                   ))}
-                  {users && users.length > 5 && users.slice(5).map((user) => (
-                    <vstack alignment="center" gap="small">
-                      <image url={user.snoovatarUrl} imageWidth={50} imageHeight={50} />
-                      {/* <text size="small" color="#FFFFFF">{user.username}</text>  */}
-                    </vstack>
-                  ))}
-                  {users && users.length > 10 && (
-                    <text size="medium" color="#FFFFFF">+{users.length - 10}</text>
+                  {users && users.length >5 && (
+                    <text size="medium" color="#FFFFFF">+{users.length - 5}</text>
                   )}
                 </hstack>
               </vstack>

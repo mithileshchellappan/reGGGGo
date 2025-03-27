@@ -25,21 +25,33 @@ export const regggoForm = Devvit.createForm(
                         value: '20'
                     },
                     {
-                        label: '30x30',
-                        value: '30'
-                    },
-                    {
-                        label: '40x40',
-                        value: '40'
-                    },
-                    {
                         label: '50x50',
                         value: '50'
                     },
                     {
-                        label: '60x60',
-                        value: '60'
-                    }
+                        label: '80x80',
+                        value: '80'
+                    },
+                    {
+                        label: '100x100',
+                        value: '100'
+                    },
+                    {
+                        label: '150x150',
+                        value: '150'
+                    },
+                    {
+                        label: '200x200',
+                        value: '200'
+                    },
+                    {
+                        label: '250x250',
+                        value: '250'
+                    },
+                    {
+                        label: '300x300',
+                        value: '300'
+                    }                        
                 ],
                 multiSelect: false,
                 required: true,

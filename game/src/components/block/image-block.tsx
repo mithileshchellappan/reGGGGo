@@ -261,7 +261,7 @@ export const ImageBlock: React.FC<BlockProps> = ({
 
       {username && isHovered && !isPlacing && (
         <Html position={[0, BRICK_HEIGHT, 0]} center distanceFactor={10}>
-          <div className="bg-black/80 text-white px-2 py-1 rounded-md text-sm whitespace-nowrap">{username}</div>
+          <div className="bg-black/50 text-white px-2 py-1 rounded-md text-sm whitespace-nowrap">{username}</div>
         </Html>
       )}
     </group>

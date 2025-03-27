@@ -13,7 +13,7 @@ export function ProductsList({ context, purchases, setUserPurchases }: { context
 
     // Pagination state
     const [currentPage, setCurrentPage] = useState(0);
-    const itemsPerPage = 3;
+    const itemsPerPage = 2;
 
     // Calculate total pages
     const totalPages = products ? Math.ceil(products.length / itemsPerPage) : 0;
@@ -39,7 +39,7 @@ export function ProductsList({ context, purchases, setUserPurchases }: { context
     };
 
     return (
-        <vstack grow gap="medium" padding="small">
+        <vstack grow gap="small" padding="small">
             <text size="large" weight="bold" color="#FFFFFF">Available Items</text>
             {products?.length === 0 ? (
                 <text color="#FFFFFF" alignment="middle center">No products available.</text>

@@ -37,7 +37,6 @@ export function onMessage(callback: (msg: any) => void): void {
 export enum MessageType {
   BRICK_ADDED = "brickAdded",
   BRICK_DELETED = "brickDeleted",
-  TIMER_UPDATE = "timerUpdate",
   CANVAS_RESIZE = "canvasResize",
   INITIAL_DATA="initialData",
   CHANNEL_BRICK_ADDED = "channelBrickAdded",

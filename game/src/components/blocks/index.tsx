@@ -103,7 +103,6 @@ export default function V0Blocks() {
   const [showResizeModal, setShowResizeModal] = useState(false)
 
   // Timer state
-  const [totalTime, setTotalTime] = useState(DEFAULT_TIMER_DURATION)
   const [timerActive, setTimerActive] = useState(false)
 
   // Cooldown state
@@ -182,12 +181,6 @@ export default function V0Blocks() {
           });
           
           break;
-
-        case MessageType.TIMER_UPDATE:
-          // Update timer
-          setTotalTime(message.totalTime)
-          setTimerActive(message.active)
-          break
 
         case MessageType.CANVAS_RESIZE:
           // Resize canvas
@@ -357,7 +350,6 @@ export default function V0Blocks() {
               isPlaying={isPlaying}
               interactionMode={interactionMode}
               isInCooldown={isInCooldown}
-              totalTime={totalTime}
               selectedBlockType={selectedBlockType}
               selectedSpecialImage={selectedSpecialImage.id}
               isSpecialLocked={isSpecialLocked}
