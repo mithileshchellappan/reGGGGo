@@ -1,17 +1,17 @@
 import { Devvit, useAsync, useChannel, useState, useWebView } from '@devvit/public-api';
 import type { Comment } from '@devvit/public-api';
 import type { DevvitMessage, WebViewMessage, } from './message.js';
-import { addUser,  deleteBrick, deleteUser, getCreation, getUsers, updateCreation, User } from './utils/gameUtils.js';
+import { addUser, deleteBrick, deleteUser, getBricksPlaced, getBricksRemoved, getCreation, getUsers, storeBricksPlaced, storeBricksRemoved, updateCreation, User } from './utils/gameUtils.js';
 import { regggoForm } from './form.js';
 import { ProductsList } from './store.js';
 import { getUserPurchases, setupPaymentHandler } from './utils/paymentUtils.js';
 
 // Helper function to check if a value is a Comment
 function isComment(value: any): value is Comment {
-  return value && 
-    typeof value === 'object' && 
-    'score' in value && 
-    'body' in value && 
+  return value &&
+    typeof value === 'object' &&
+    'score' in value &&
+    'body' in value &&
     'authorName' in value;
 }
 
@@ -54,7 +54,8 @@ Devvit.addCustomPostType({
     const [users, setUsers] = useState<User[]>(async () => await getUsers(context))
     const [userPurchases, setUserPurchases] = useState(async () => await getUserPurchases(context))
     const [showStore, setShowStore] = useState(false)
-
+    const [bricksPlaced, setBricksPlaced] = useState(async () => await getBricksPlaced(context))
+    const [bricksRemoved, setBricksRemoved] = useState(async () => await getBricksRemoved(context))
 
     // Get the top comment
     const { data: commentData, loading, error } = useAsync(async () => {
@@ -66,24 +67,24 @@ Devvit.addCustomPostType({
             limit: 100,
           })
           .all();
-        
+
         if (comments.length === 0) return null;
-        
+
         // Sort comments and get the top one
         const topComment = comments.sort((a, b) => b.score - a.score)[0];
-        
+
         // Return a simple object with only the needed properties
         const score = typeof topComment.score === 'number' ? topComment.score : 0;
         const body = typeof topComment.body === 'string' ? topComment.body : "";
         const authorName = typeof topComment.authorName === 'string' ? topComment.authorName : "unknown";
-        
+
         return { score, body, authorName };
       } catch (e) {
         console.error("Error fetching comments:", e);
         return null;
       }
     });
-    
+
     // Extract comment data in a type-safe way
     const topComment = commentData ? {
       score: commentData.score,
@@ -119,6 +120,7 @@ Devvit.addCustomPostType({
                 brick: message.data.brick,
               }
             })
+            await storeBricksPlaced(context, bricksPlaced + 1)
             break;
           case 'brickDeleted':
             console.log("Brick deleted:", message.data.brick)
@@ -133,6 +135,7 @@ Devvit.addCustomPostType({
                 brickId: message.data.brick.id,
               }
             })
+            await storeBricksRemoved(context, bricksRemoved + 1)
             break;
           default:
             console.log(message)
@@ -151,6 +154,14 @@ Devvit.addCustomPostType({
           console.log("current user in channel:", username)
           console.log("Message from channel:", message.type)
           if (!message || !webView) return;
+
+          if (message.type === 'brickAdded') {
+            setBricksPlaced(bricksPlaced + 1)
+          }
+
+          if (message.type === 'brickDeleted') {
+            setBricksRemoved(bricksRemoved + 1)
+          }
 
           if (message.username === username) {
             console.log("Ignoring message from self");
@@ -250,7 +261,12 @@ Devvit.addCustomPostType({
                     {creation?.creationName?.replace('Build ', '') ?? 'REGGGGO'}
                   </text>
                 </hstack>
-                <spacer size="medium" />
+                <spacer size="small" />
+                  <hstack alignment="middle center" gap="small" backgroundColor="rgba(0, 0, 0, 0.4)">
+                    <text size="small" color="green">🔨 +{bricksPlaced}</text>
+                    <text size="small" color="red">🗑️ -{bricksRemoved}</text>
+                  </hstack>
+                <spacer size="small" />
                 <hstack gap="small">
                   <button onPress={onShopPress} appearance="secondary">
                     🛒 Shop
@@ -262,21 +278,21 @@ Devvit.addCustomPostType({
                 <spacer size="medium" />
                 <vstack>
 
-                {loading && <text>Loading top comment...</text>}
-                {error && <text color="red">Error loading comment: {error.message}</text>}
-                {topComment && isComment(topComment) && (
-                  <vstack padding="small" cornerRadius="medium" backgroundColor="rgba(0, 0, 0, 0.8)">
-                    <text size="medium" color="#108be8">Top Strategy:</text>
-                    <spacer size="small" />
-                    <text style="body" wrap>{topComment.body.slice(0, 250)}{topComment.body.length > 250 ? '...' : ''}</text>
-                    <hstack>
-                    <text size="small" color="#2d81c2">u/{topComment.authorName}</text>
-                    <spacer />
-                    <text size="xsmall">↑ {topComment.score}</text>
-                    </hstack>
-                  </vstack>
-                )}
-                {!loading && !error && !topComment && <text size="xsmall" color="#FFFFFF">Strategize in the comments!</text>}
+                  {loading && <text>Loading top comment...</text>}
+                  {error && <text color="red">Error loading comment: {error.message}</text>}
+                  {topComment && isComment(topComment) && (
+                    <vstack padding="small" cornerRadius="medium" backgroundColor="rgba(0, 0, 0, 0.8)">
+                      <text size="medium" color="#108be8">Top Strategy:</text>
+                      <spacer size="small" />
+                      <text style="body" wrap>{topComment.body.slice(0, 250)}{topComment.body.length > 250 ? '...' : ''}</text>
+                      <hstack>
+                        <text size="small" color="#2d81c2">u/{topComment.authorName}</text>
+                        <spacer />
+                        <text size="xsmall">↑ {topComment.score}</text>
+                      </hstack>
+                    </vstack>
+                  )}
+                  {!loading && !error && !topComment && <text size="xsmall" color="#FFFFFF">Strategize in the comments!</text>}
                 </vstack>
               </vstack>
               <spacer size="large" />
@@ -285,10 +301,10 @@ Devvit.addCustomPostType({
                   {users && users.length > 0 && users.slice(0, 5).map((user) => (
                     <vstack alignment="center" gap="small">
                       <image description={user.username} url={user.snoovatarUrl} imageWidth={50} imageHeight={50} />
-                      {/* <text size="xsmall" color="#FFFFFF">{user.username}</text> */}
+                      <text size="xsmall" color="#FFFFFF">{user.username.slice(0, 10)}</text>
                     </vstack>
                   ))}
-                  {users && users.length >5 && (
+                  {users && users.length > 5 && (
                     <text size="medium" color="#FFFFFF">+{users.length - 5}</text>
                   )}
                 </hstack>

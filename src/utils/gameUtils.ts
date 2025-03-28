@@ -164,3 +164,31 @@ export const deleteUser = async (context: Context, user: User) => {
   const updatedUsers = await redis.get(usersKey);
   return updatedUsers ? JSON.parse(updatedUsers) : [];
 };
+
+export const storeBricksPlaced = async (context: Context, bricksPlaced: number) => {
+  const { postId, redis } = context;
+  const bricksPlacedKey = `bricksPlaced:${postId}`;
+  await redis.set(bricksPlacedKey, bricksPlaced.toString());
+};
+
+export const storeBricksRemoved = async (context: Context, bricksRemoved: number) => {
+  const { postId, redis } = context;
+  const bricksRemovedKey = `bricksRemoved:${postId}`;
+  await redis.set(bricksRemovedKey, bricksRemoved.toString());
+};
+
+export const getBricksPlaced = async (context: Context) => {
+  const { postId, redis } = context;
+  const bricksPlacedKey = `bricksPlaced:${postId}`;
+  const bricksPlaced = await redis.get(bricksPlacedKey);
+  return bricksPlaced ? parseInt(bricksPlaced) : 0;
+};
+
+export const getBricksRemoved = async (context: Context) => {
+  const { postId, redis } = context;
+  const bricksRemovedKey = `bricksRemoved:${postId}`;
+  const bricksRemoved = await redis.get(bricksRemovedKey);
+  return bricksRemoved ? parseInt(bricksRemoved) : 0;
+};
+
+

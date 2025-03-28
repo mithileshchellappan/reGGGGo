@@ -1,7 +1,7 @@
 # reGGGGo
 
 ## What is this?
-reGGGGo is a collaborative 3D block building game where users can place, delete, and interact with blocks in a shared space. Build together with other Reddit users to create amazing structures.
+reGGGGo is a collaborative 3D block building game inspired by r/Place where users can place, delete, and interact with blocks in a shared space. Build together with other Reddit users to create amazing structures.
 
 ## How to Play
 
